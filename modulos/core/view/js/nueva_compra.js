@@ -1,0 +1,713 @@
+
+
+var numlineas = 0;
+var fs_nf0 = 2;
+var all_impuestos = [];
+var all_series = [];
+var proveedor = false;
+var nueva_compra_url = '';
+var kiwimaru_url = '';
+var precio_compra = 'coste';
+var fin_busqueda1 = true;
+var fin_busqueda2 = true;
+var siniva = false;
+var irpf = 0;
+var tiene_recargo = false;
+
+function usar_proveedor(codproveedor)
+{
+   if(nueva_compra_url !== '')
+   {
+      $.getJSON(nueva_compra_url, 'datosproveedor='+codproveedor, function(json) {
+         proveedor = json;
+         document.f_buscar_articulos.codproveedor.value = proveedor.codproveedor;
+         if(proveedor.regimeniva == 'Exento')
+         {
+            irpf = 0;
+            for(var j=0; j<numlineas; j++)
+            {
+               if($("#linea_"+j).length > 0)
+               {
+                  $("#iva_"+j).val(0);
+                  $("#recargo_"+j).val(0);
+               }
+            }
+         }
+         recalcular();
+      });
+   }
+}
+
+function usar_serie()
+{
+   for(var i=0; i<all_series.length; i++)
+   {
+      if(all_series[i].codserie == $("#codserie").val())
+      {
+         siniva = all_series[i].siniva;
+         irpf = all_series[i].irpf;
+         
+         for(var j=0; j<numlineas; j++)
+         {
+            if($("#linea_"+j).length > 0)
+            {
+               if(siniva)
+               {
+                  $("#iva_"+j).val(0);
+                  $("#recargo_"+j).val(0);
+               }
+            }
+         }
+         
+         break;
+      }
+   }
+}
+
+function recalcular()
+{
+   var l_uds = 0;
+   var l_pvp = 0;
+   var l_dto = 0;
+   var l_neto = 0;
+   var l_iva = 0;
+   var l_irpf = 0;
+   var l_recargo = 0;
+   var neto = 0;
+   var total_iva = 0;
+   var total_irpf = 0;
+   var total_recargo = 0;
+   
+   for(var i=0; i<numlineas; i++)
+   {
+      if($("#linea_"+i).length > 0)
+      {
+         l_uds = parseFloat( $("#cantidad_"+i).val() );
+         l_pvp = parseFloat( $("#pvp_"+i).val() );
+         l_dto = parseFloat( $("#dto_"+i).val() );
+         l_neto = l_uds*l_pvp*(100-l_dto)/100;
+         l_iva = parseFloat( $("#iva_"+i).val() );
+         l_irpf = parseFloat( $("#irpf_"+i).val() );
+         
+
+         if(tiene_recargo)
+         {
+            l_recargo = parseFloat( $("#recargo_"+i).val() );
+         }
+         else
+         {
+            l_recargo = 0;
+            $("#recargo_"+i).val(0);
+         }
+         
+         $("#neto_"+i).val( l_neto );
+         if(numlineas == 1)
+         {
+            $("#total_"+i).val( fs_round(l_neto, fs_nf0) + fs_round(l_neto*(l_iva-l_irpf+l_recargo)/100, fs_nf0) );
+         }
+         else
+         {
+            $("#total_"+i).val( number_format(l_neto + (l_neto*(l_iva-l_irpf+l_recargo)/100), fs_nf0, '.', '') );
+         }
+         
+         neto += l_neto;
+         total_iva += l_neto * l_iva/100;
+         total_irpf += l_neto * l_irpf/100;
+         total_recargo += l_neto * l_recargo/100;
+         
+         /// adaptamos el alto del textarea al texto
+         var txt = $("textarea[name='desc_"+i+"']").val();
+         txt = txt.split(/\r*\n/);
+         if(txt.length > 1)
+         {
+            $("textarea[name='desc_"+i+"']").prop('rows', txt.length);
+         }
+      }
+   }
+   
+   neto = fs_round(neto, fs_nf0);
+   total_iva = fs_round(total_iva, fs_nf0);
+   total_irpf = fs_round(total_irpf, fs_nf0);
+   total_recargo = fs_round(total_recargo, fs_nf0);
+   $("#aneto").html( show_numero(neto) );
+   $("#aiva").html( show_numero(total_iva) );
+   $("#are").html( show_numero(total_recargo) );
+   $("#airpf").html( show_numero(total_irpf) );
+   $("#atotal").val( neto + total_iva - total_irpf + total_recargo );
+   
+   if(total_recargo == 0 && !tiene_recargo)
+   {
+      $(".recargo").hide();
+   }
+   else
+   {
+      $(".recargo").show();
+   }
+   
+   if(total_irpf == 0 && irpf == 0)
+   {
+      $(".irpf").hide();
+   }
+   else
+   {
+      $(".irpf").show();
+   }
+}
+
+function ajustar_neto()
+{
+   var l_uds = 0;
+   var l_pvp = 0;
+   var l_dto = 0;
+   var l_neto = 0;
+   
+   for(var i=0; i<numlineas; i++)
+   {
+      if($("#linea_"+i).length > 0)
+      {
+         l_uds = parseFloat( $("#cantidad_"+i).val() );
+         l_pvp = parseFloat( $("#pvp_"+i).val() );
+         l_dto = parseFloat( $("#dto_"+i).val() );
+         l_neto = parseFloat( $("#neto_"+i).val() );
+         if( isNaN(l_neto) )
+         {
+            l_neto = 0;
+         }
+         
+         if( l_neto <= l_pvp*l_uds )
+         {
+            l_dto = 100 - 100*l_neto/(l_pvp*l_uds);
+            if( isNaN(l_dto) )
+            {
+               l_dto = 0;
+            }
+         }
+         else
+         {
+            l_dto = 0;
+            l_pvp = 100*l_neto/(l_uds*(100-l_dto));
+            if( isNaN(l_pvp) )
+            {
+               l_pvp = 0;
+            }
+         }
+         
+         $("#pvp_"+i).val(l_pvp);
+         $("#dto_"+i).val(l_dto);
+      }
+   }
+   
+   recalcular();
+}
+
+function ajustar_total()
+{
+   var l_uds = 0;
+   var l_pvp = 0;
+   var l_dto = 0;
+   var l_iva = 0;
+   var l_irpf = 0;
+   var l_recargo = 0;
+   var l_neto = 0;
+   var l_total = 0;
+   
+   for(var i=0; i<numlineas; i++)
+   {
+      if($("#linea_"+i).length > 0)
+      {
+         l_uds = parseFloat( $("#cantidad_"+i).val() );
+         l_pvp = parseFloat( $("#pvp_"+i).val() );
+         l_dto = parseFloat( $("#dto_"+i).val() );
+         l_iva = parseFloat( $("#iva_"+i).val() );
+         l_recargo = parseFloat( $("#recargo_"+i).val() );
+         
+         l_irpf = irpf;
+         if(l_iva <= 0)
+         {
+            l_irpf = 0;
+         }
+         
+         l_total = parseFloat( $("#total_"+i).val() );
+         if( isNaN(l_total) )
+         {
+            l_total = 0;
+         }
+         
+         if( l_total <= l_pvp*l_uds + (l_pvp*l_uds*(l_iva-l_irpf+l_recargo)/100) )
+         {
+            l_neto = 100*l_total/(100+l_iva-l_irpf+l_recargo);
+            l_dto = 100 - 100*l_neto/(l_pvp*l_uds);
+            if( isNaN(l_dto) )
+            {
+               l_dto = 0;
+            }
+         }
+         else
+         {
+            l_dto = 0;
+            l_neto = 100*l_total/(100+l_iva-l_irpf+l_recargo);
+            l_pvp = l_neto/l_uds;
+         }
+         
+         $("#pvp_"+i).val(l_pvp);
+         $("#dto_"+i).val(l_dto);
+      }
+   }
+   
+   recalcular();
+}
+
+function ajustar_iva(num)
+{
+   if($("#linea_"+num).length > 0)
+   {
+      if(proveedor.regimeniva == 'Exento')
+      {
+         $("#iva_"+num).val(0);
+         $("#recargo_"+num).val(0);
+         
+         alert('El proveedor tiene regimen de IVA: '+proveedor.regimeniva);
+      }
+      else if(siniva && $("#iva_"+num).val() != 0)
+      {
+         $("#iva_"+num).val(0);
+         $("#recargo_"+num).val(0);
+         
+         alert('La serie selecciona es sin IVA.');
+      }
+      else if(tiene_recargo)
+      {
+         for(var i=0; i<all_impuestos.length; i++)
+         {
+            if($("#iva_"+num).val() == all_impuestos[i].iva)
+            {
+               $("#recargo_"+num).val(all_impuestos[i].recargo);
+            }
+         }
+      }
+   }
+   
+   recalcular();
+}
+
+function aux_all_impuestos(num,codimpuesto)
+{
+   var iva = 0;
+   var recargo = 0;
+   if(proveedor.regimeniva != 'Exento' && !siniva)
+   {
+      for(var i=0; i<all_impuestos.length; i++)
+      {
+         if(all_impuestos[i].codimpuesto == codimpuesto)
+         {
+            iva = all_impuestos[i].iva;
+            if(tiene_recargo)
+            {
+               recargo = all_impuestos[i].recargo;
+            }
+            break;
+         }
+      }
+   }
+   
+   var html = "<td><select id=\"iva_"+num+"\" class=\"form-control\" name=\"iva_"+num+"\" onchange=\"ajustar_iva('"+num+"')\">";
+   for(var i=0; i<all_impuestos.length; i++)
+   {
+      if(iva == all_impuestos[i].iva)
+      {
+         html += "<option value=\""+all_impuestos[i].iva+"\" selected=\"\">"+all_impuestos[i].descripcion+"</option>";
+      }
+      else
+         html += "<option value=\""+all_impuestos[i].iva+"\">"+all_impuestos[i].descripcion+"</option>";
+   }
+   html += "</select></td>";
+   
+   html += "<td class=\"recargo\"><input type=\"text\" class=\"form-control text-right\" id=\"recargo_"+num+"\" name=\"recargo_"+num+
+         "\" value=\""+recargo+"\" onclick=\"this.select()\" onkeyup=\"recalcular()\" autocomplete=\"off\"/></td>";
+   
+   html += "<td class=\"irpf\"><input type=\"text\" class=\"form-control text-right\" id=\"irpf_"+num+"\" name=\"irpf_"+num+
+         "\" value=\""+irpf+"\" onclick=\"this.select()\" onkeyup=\"recalcular()\" autocomplete=\"off\"/></td>";
+   
+   return html;
+}
+//------------------------------------------------------------------------------------------------------------------
+$(document).on('change' , '#in_igv' , function(){
+
+   if(this.checked) {
+
+      var coste =$(this).parent().siblings('input').val();
+      gcos = coste;
+      $(this).parent().siblings('input').val(Math.round(coste/1.18));
+      $(this).parent().siblings('input').addClass('');
+   }else{
+      console.log(gcos);
+
+      $(this).parent().siblings('input').val($(this).val());
+   }
+   recalcular();
+
+});
+//-------------------------------------------------------------------------------------------------------------------
+function add_articulo(ref,desc,pvp,dto,codimpuesto)
+{
+   desc = Base64.decode(desc);
+   $("#lineas_albaran").append("<tr id=\"linea_"+numlineas+"\">\n\
+      <td><input type=\"hidden\" name=\"idlinea_"+numlineas+"\" value=\"-1\"/>\n\
+         <input type=\"hidden\" name=\"referencia_"+numlineas+"\" value=\""+ref+"\"/>\n\
+         <div class=\"form-control\"><small><a target=\"_blank\" href=\"index.php?page=ventas_articulo&ref="+ref+"\">"+ref+"</a></small></div></td>\n\
+      <td><textarea class=\"form-control\" id=\"desc_"+numlineas+"\" name=\"desc_"+numlineas+"\" rows=\"1\" onclick=\"this.select()\">"+desc+"</textarea></td>\n\
+      <td><input type=\"number\" step=\"any\" id=\"cantidad_"+numlineas+"\" class=\"form-control text-right\" name=\"cantidad_"+numlineas+
+         "\" onchange=\"recalcular()\" onkeyup=\"recalcular()\" autocomplete=\"off\" value=\"1\"/></td>\n\
+      <td><button class=\"btn btn-sm btn-danger\" type=\"button\" onclick=\"$('#linea_"+numlineas+"').remove();recalcular();\">\n\
+         <span class=\"glyphicon glyphicon-trash\"></span></button></td>\n\
+      <td><label style='position: absolute; font-size: 7px;margin-top: 3px; margin-left: 4px;'><input value=\""+pvp+"\" id=\"in_igv\" type='checkbox' /><br/>INCLU. IGV</label> <input type=\"text\" class=\"form-control text-right\" id=\"pvp_"+numlineas+"\" name=\"pvp_"+numlineas+"\" value=\""+pvp+
+         "\" onkeyup=\"recalcular()\" onclick=\"this.select()\" autocomplete=\"off\"/></td>\n\
+      <td><input type=\"text\" id=\"dto_"+numlineas+"\" name=\"dto_"+numlineas+"\" value=\""+dto+
+         "\" class=\"form-control text-right\" onkeyup=\"recalcular()\" onchange=\"recalcular()\" onclick=\"this.select()\" autocomplete=\"off\"/></td>\n\
+      <td><input type=\"text\" class=\"form-control text-right\" id=\"neto_"+numlineas+"\" name=\"neto_"+numlineas+
+         "\" onchange=\"ajustar_neto()\" onclick=\"this.select()\" autocomplete=\"off\"/></td>\n\
+      "+aux_all_impuestos(numlineas,codimpuesto)+"\n\
+      <td><input type=\"text\" class=\"form-control text-right\" id=\"total_"+numlineas+"\" name=\"total_"+numlineas+
+         "\" onchange=\"ajustar_total()\" onclick=\"this.select()\" autocomplete=\"off\"/></td></tr>");
+   numlineas += 1;
+   $("#numlineas").val(numlineas);
+   recalcular();
+   
+   $("#modal_articulos").modal('hide');
+   
+   $("#desc_"+(numlineas-1)).select();
+   return false;
+}
+
+function add_articulo_atributos(ref,desc,pvp,dto,codimpuesto)
+{
+   $.ajax({
+      type: 'POST',
+      url: nueva_compra_url,
+      dataType: 'html',
+      data: "referencia4combi="+ref+"&desc="+desc+"&pvp="+pvp+"&dto="+dto+"&codimpuesto="+codimpuesto,
+      success: function(datos) {
+         $("#nav_articulos").hide();
+         $("#search_results").html(datos);
+      }
+   });
+}
+
+function add_linea_libre()
+{
+   codimpuesto = false;
+   for(var i=0; i<all_impuestos.length; i++)
+   {
+      codimpuesto = all_impuestos[i].codimpuesto;
+      break;
+   }
+   
+   $("#lineas_albaran").append("<tr id=\"linea_"+numlineas+"\">\n\
+      <td><input type=\"hidden\" name=\"idlinea_"+numlineas+"\" value=\"-1\"/>\n\
+         <input type=\"hidden\" name=\"referencia_"+numlineas+"\"/>\n\
+         <div class=\"form-control\"></div></td>\n\
+      <td><textarea class=\"form-control\" id=\"desc_"+numlineas+"\" name=\"desc_"+numlineas+"\" rows=\"1\" onclick=\"this.select()\"></textarea></td>\n\
+      <td><input type=\"number\" step=\"any\" id=\"cantidad_"+numlineas+"\" class=\"form-control text-right\" name=\"cantidad_"+numlineas+
+         "\" onchange=\"recalcular()\" onkeyup=\"recalcular()\" autocomplete=\"off\" value=\"1\"/></td>\n\
+      <td><button class=\"btn btn-sm btn-danger\" type=\"button\" onclick=\"$('#linea_"+numlineas+"').remove();recalcular();\">\n\
+         <span class=\"glyphicon glyphicon-trash\"></span></button></td>\n\
+      <td><input type=\"text\" class=\"form-control text-right\" id=\"pvp_"+numlineas+"\" name=\"pvp_"+numlineas+"\" value=\"0\"\n\
+          onkeyup=\"recalcular()\" onclick=\"this.select()\" autocomplete=\"off\"/></td>\n\
+      <td><input type=\"text\" id=\"dto_"+numlineas+"\" name=\"dto_"+numlineas+"\" value=\"0\" class=\"form-control text-right\"\n\
+          onkeyup=\"recalcular()\" onclick=\"this.select()\" autocomplete=\"off\"/></td>\n\
+      <td><input type=\"text\" class=\"form-control text-right\" id=\"neto_"+numlineas+"\" name=\"neto_"+numlineas+
+         "\" onchange=\"ajustar_neto()\" onclick=\"this.select()\" autocomplete=\"off\"/></td>\n\
+      "+aux_all_impuestos(numlineas,codimpuesto)+"\n\
+      <td><input type=\"text\" class=\"form-control text-right\" id=\"total_"+numlineas+"\" name=\"total_"+numlineas+
+         "\" onchange=\"ajustar_total()\" onclick=\"this.select()\" autocomplete=\"off\"/></td></tr>");
+   numlineas += 1;
+   $("#numlineas").val(numlineas);
+   recalcular();
+   
+   $("#desc_"+(numlineas-1)).select();
+   return false;
+}
+
+function get_precios(ref)
+{
+   if(nueva_compra_url !== '')
+   {
+      $.ajax({
+         type: 'POST',
+         url: nueva_compra_url,
+         dataType: 'html',
+         data: "referencia4precios="+ref+"&codproveedor="+proveedor.codproveedor,
+         success: function(datos) {
+            $("#nav_articulos").hide();
+            $("#search_results").html(datos);
+         }
+      });
+   }
+}
+
+function new_articulo()
+{
+   if(nueva_compra_url !== '')
+   {
+      $.ajax({
+         type: 'POST',
+         url: nueva_compra_url+'&new_articulo=TRUE',
+         dataType: 'json',
+         data: $("form[name=f_nuevo_articulo]").serialize(),
+         success: function(datos) {
+            if(typeof datos[0] == 'undefined')
+            {
+               if(document.f_nuevo_articulo.referencia.value == '')
+               {
+                  alert('Debes escribir una referencia.');
+               }
+               else
+               {
+                  alert('Se ha producido un error al crear el artículo.');
+               }
+            }
+            else
+            {
+               document.f_buscar_articulos.query.value = document.f_nuevo_articulo.referencia.value;
+               $("#nav_articulos li").each(function() {
+                  $(this).removeClass("active");
+               });
+               $("#li_mis_articulos").addClass('active');
+               $("#search_results").show();
+               $("#nuevo_articulo").hide();
+               
+               if(precio_compra == 'coste')
+               {
+                  add_articulo(datos[0].referencia, Base64.encode(datos[0].descripcion), datos[0].coste, 0, datos[0].codimpuesto);
+               }
+               else
+               {
+                  add_articulo(datos[0].referencia, Base64.encode(datos[0].descripcion), datos[0].coste, 0, datos[0].codimpuesto);
+               }
+            }
+         }
+      });
+   }
+}
+
+function buscar_articulos()
+{
+   document.f_nuevo_articulo.referencia.value = document.f_buscar_articulos.query.value;
+   document.f_nuevo_articulo.refproveedor.value = document.f_buscar_articulos.query.value;
+   
+   if(document.f_buscar_articulos.query.value == '')
+   {
+      $("#nav_articulos").hide();
+      $("#search_results").html('');
+      $("#nuevo_articulo").hide();
+      
+      fin_busqueda1 = true;
+      fin_busqueda2 = true;
+   }
+   else
+   {
+      $("#nav_articulos").show();
+      
+      if(nueva_compra_url !== '')
+      {
+         fin_busqueda1 = false;
+         $.getJSON(nueva_compra_url, $("form[name=f_buscar_articulos]").serialize(), function(json) {
+            var items = [];
+            var insertar = false;
+            $.each(json, function(key, val) {
+               var descripcion = Base64.encode(val.descripcion);
+               var descripcion_visible = val.descripcion;
+               if(val.codfamilia)
+               {
+                  descripcion_visible += ' <span class="label label-default" title="Familia: '+val.codfamilia+'">'
+                          +val.codfamilia+'</span>';
+               }
+               if(val.codfabricante)
+               {
+                  descripcion_visible += ' <span class="label label-default" title="Fabricante-----------------: '+val.codfabricante+'">'
+                          +val.codfabricante+'</span>';
+               }
+               
+               var precio = val.coste;
+               if(precio_compra == 'pvp')
+               {
+                  precio = val.pvp;
+               }
+               
+               var tr_aux = '<tr>';
+               if(val.bloqueado)
+               {
+                  tr_aux = "<tr class=\"danger\">";
+               }
+               else if(val.stockfis < val.stockmin)
+               {
+                  tr_aux = "<tr class=\"warning\">";
+               }
+               else if(val.stockfis > val.stockmax)
+               {
+                  tr_aux = "<tr class=\"success\">";
+               }
+               
+               if(val.secompra)
+               {
+                  var funcion = 'add_articulo';
+                  
+                  if(val.tipo == 'atributos')
+                  {
+                     funcion = 'add_articulo_atributos';
+                  }
+                  
+                  items.push(tr_aux+"<td><a href=\"#\" onclick=\"get_precios('"+val.referencia+"')\" title=\"más detalles\">\n\
+                     <span class=\"glyphicon glyphicon-eye-open\"></span></a>\n\
+                     &nbsp; <a href=\"#\" onclick=\"return "+funcion+"('"
+                          +val.referencia+"','"+descripcion+"','"+val.coste+"','"+val.dtopor+"','"+val.codimpuesto+"')\">"
+                          +val.referencia+'</a> '+descripcion_visible+"</td>\n\
+                     <td class=\"text-right\"><a href=\"#\" onclick=\"return "+funcion+"('"
+                          +val.referencia+"','"+descripcion+"','"+val.coste+"','"+val.dtopor+"','"+val.codimpuesto+"')\">"
+                          +show_precio(val.coste)+"</a></td>\n\
+                     <td class=\"text-right\"><a href=\"#\" onclick=\"return "+funcion+"('"
+                          +val.referencia+"','"+descripcion+"','"+val.pvp+"','0','"+val.codimpuesto+"')\" title=\"actualizado el "
+                          +val.factualizado+"\">"+show_precio(val.pvp)+"</a></td>\n\
+                     <td class=\"text-right\">"+val.stockfis+"</td></tr>");
+               }
+               
+               if(val.query == document.f_buscar_articulos.query.value)
+               {
+                  insertar = true;
+                  fin_busqueda1 = true;
+               }
+            });
+            
+            if(items.length == 0 && !fin_busqueda1)
+            {
+               items.push("<tr><td colspan=\"4\" class=\"warning\">Sin resultados. Usa la pestaña\n\
+                              <b>Nuevo</b> para crear uno.</td></tr>");
+               document.f_nuevo_articulo.referencia.value = document.f_buscar_articulos.query.value;
+               insertar = true;
+            }
+            
+            if(insertar)
+            {
+               $("#search_results").html("<div class=\"table-responsive\"><table class=\"table table-hover\"><thead><tr>\n\
+                  <th class=\"text-left\">Referencia + descripción</th><th class=\"text-right\">Coste</th>\n\
+                  <th class=\"text-right\">Precio</th><th class=\"text-right\">Stock</th></tr></thead>"
+                       +items.join('')+"</table></div>");
+            }
+         });
+      }
+      
+      if(kiwimaru_url !== '')
+      {
+         fin_busqueda2 = false;
+         $.getJSON(kiwimaru_url, $("form[name=f_buscar_articulos]").serialize(), function(json) {
+            var items = [];
+            var insertar = false;
+            $.each(json, function(key, val) {
+               items.push( "<tr><td>"+val.sector+" / <a href=\""+val.link+"\" target=\"_blank\">"
+                       +val.tienda+"</a> / "+val.familia+"</td>\n\
+                  <td><a href=\""+val.link+"\" target=\"_blank\"><span class=\"glyphicon glyphicon-eye-open\"></span></a>\n\
+                  <a href=\"#\" onclick=\"kiwi_import('"+val.referencia+"','"+val.descripcion+"','"+val.precio+"')\">"
+                       +val.referencia+'</a> '+val.descripcion+"</td>\n\
+                  <td class=\"text-right\"><a href=\"#\" onclick=\"kiwi_import('"
+                       +val.referencia+"','"+val.descripcion+"','"+val.precio+"')\">"+show_precio(val.precio)+"</a></td></tr>" );
+               
+               if(val.query == document.f_buscar_articulos.query.value)
+               {
+                  insertar = true;
+                  fin_busqueda2 = true;
+               }
+            });
+            
+            if(items.length == 0 && !fin_busqueda2)
+            {
+               items.push("<tr><td colspan=\"3\" class=\"warning\">Sin resultados.</td></tr>");
+               insertar = true;
+            }
+            
+            if(insertar)
+            {
+              
+            }
+         });
+      }
+   }
+}
+
+function kiwi_import(ref,desc,pvp)
+{
+   $("#nav_articulos li").each(function() {
+      $(this).removeClass("active");
+   });
+   $("#li_nuevo_articulo").addClass('active');
+   $("#search_results").hide();
+   $("#nuevo_articulo").show();
+   document.f_nuevo_articulo.referencia.value = ref;
+   document.f_nuevo_articulo.refproveedor.value = ref;
+   document.f_nuevo_articulo.descripcion.value = desc;
+   document.f_nuevo_articulo.coste.value = pvp;
+   document.f_nuevo_articulo.pvp.value = pvp;
+   document.f_nuevo_articulo.referencia.select();
+}
+
+$(document).ready(function() {
+   $("#i_new_line").click(function() {
+      $("#i_new_line").val("");
+      $("#nav_articulos li").each(function() {
+         $(this).removeClass("active");
+      });
+      $("#li_mis_articulos").addClass('active');
+      $("#search_results").show();
+      $("#nuevo_articulo").hide();
+      $("#modal_articulos").modal('show');
+      document.f_buscar_articulos.query.select();
+   });
+   
+   $("#i_new_line").keyup(function() {
+      document.f_buscar_articulos.query.value = $("#i_new_line").val();
+      $("#i_new_line").val('');
+      $("#nav_articulos li").each(function() {
+         $(this).removeClass("active");
+      });
+      $("#li_mis_articulos").addClass('active');
+      $("#search_results").show();
+      $("#nuevo_articulo").hide();
+      $("#modal_articulos").modal('show');
+      document.f_buscar_articulos.query.select();
+      buscar_articulos();
+   });
+   
+   $("#f_buscar_articulos").keyup(function() {
+      buscar_articulos();
+   });
+   
+   $("#f_buscar_articulos").submit(function(event) {
+      event.preventDefault();
+      buscar_articulos();
+   });
+   
+   $("#b_mis_articulos").click(function(event) {
+      event.preventDefault();
+      $("#nav_articulos li").each(function() {
+         $(this).removeClass("active");
+      });
+      $("#li_mis_articulos").addClass('active');
+      $("#nuevo_articulo").hide();
+      $("#search_results").show();
+      document.f_buscar_articulos.query.focus();
+   });
+   
+
+   
+   $("#b_nuevo_articulo").click(function(event) {
+      event.preventDefault();
+      $("#nav_articulos li").each(function() {
+         $(this).removeClass("active");
+      });
+      $("#li_nuevo_articulo").addClass('active');
+      $("#search_results").hide();
+      $("#nuevo_articulo").show();
+      document.f_nuevo_articulo.referencia.select();
+   });
+   
+
+});

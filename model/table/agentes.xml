@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Document   : agentes.xml
-    Description:
-        Estructura de la tabla agentes.
--->
 <tabla>
    <columna>
       <nombre>apellidos</nombre>

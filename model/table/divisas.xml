@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Document   : divisas.xml
-    Description:
-        Estructura de la tabla divisas.
--->
 <tabla>
    <columna>
       <nombre>bandera</nombre>

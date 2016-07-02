@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tabla>
+    <columna>
+        <nombre>idplanilla</nombre>
+        <tipo>serial</tipo>
+        <nulo>NO</nulo>
+    </columna>
+    <columna>
+        <nombre>nombre</nombre>
+        <tipo>text</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>apellido</nombre>
+        <tipo>text</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>remu_basica</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>bonifi_basica</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna><columna>
+        <nombre>bonifi_espesifica</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>total_ganado</nombre>
+        <tipo>double precision</tipo>
+        <nulo>NO</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>desc_afp</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>desc_snp</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>desc_adelanto</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>desc_otros</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>desc_total</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>neto_pagar</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>aporte_esalud</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>aporte_sctr</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>aporte_total</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+        <defecto>0</defecto>
+    </columna>
+    <columna>
+        <nombre>fecha_pago</nombre>
+        <tipo>date</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <restriccion>
+        <nombre>planilla_pkey</nombre>
+        <consulta>PRIMARY KEY (idplanilla)</consulta>
+    </restriccion>
+</tabla>

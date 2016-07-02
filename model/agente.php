@@ -1,47 +1,12 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/**
- * El agente/empleado es el que se asocia a un albarán, factura o caja.
- * Cada usuario puede estar asociado a un agente, y un agente puede
- * estar asociado a varios usuarios.
- */
 class agente extends fs_model
 {
-   /**
-    * Clave primaria. Varchar (10).
-    * @var type
-    */
-   public $codagente;
    
-   /**
-    * Identificador fiscal.
-    * @var type 
-    */
+   public $codagente;
    public $dnicif;
    public $nombre;
    public $apellidos;
-   
-   /**
-    * Todavía sin uso.
-    * @var type 
-    */
    public $coddepartamento;
    public $email;
    public $fax;
@@ -51,24 +16,15 @@ class agente extends fs_model
    public $provincia;
    public $ciudad;
    public $direccion;
-   
    public $seg_social;
    public $cargo;
    public $banco;
    public $f_nacimiento;
    public $f_alta;
    public $f_baja;
-
-   /**
-    * Porcentaje de comisión del agente. Se utiliza en presupuestos, pedidos, albaranes y facturas.
-    * @var type 
-    */
    public $porcomision;
    
-   /**
-    * Todavía sin uso.
-    * @var type 
-    */
+
    public $irpf;
    
    public function __construct($a=FALSE)
@@ -143,7 +99,7 @@ class agente extends fs_model
    {
       $this->clean_cache();
       return "INSERT INTO ".$this->table_name." (codagente,nombre,apellidos,dnicif)
-         VALUES ('1','Paco','Pepe','00000014Z');";
+         VALUES ('1','Jhordy','Huaman','AG001');";
    }
    
    public function get_fullname()

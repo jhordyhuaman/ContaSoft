@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Document   : fs_relations.xml
-    Description:
-        Estructura de la tabla fs_relations.
--->
 <tabla>
    <columna>
       <nombre>id</nombre>

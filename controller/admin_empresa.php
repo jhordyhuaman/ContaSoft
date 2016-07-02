@@ -1,31 +1,15 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+
 
 require_once 'extras/phpmailer/class.phpmailer.php';
 require_once 'extras/phpmailer/class.smtp.php';
 require_model('almacen.php');
 require_model('cuenta_banco.php');
-require_model('divisa.php');
 require_model('ejercicio.php');
 require_model('forma_pago.php');
 require_model('pais.php');
 require_model('serie.php');
+
 
 class admin_empresa extends fs_controller
 {
@@ -45,7 +29,6 @@ class admin_empresa extends fs_controller
    
    protected function private_core()
    {
-      /// inicializamos para que se creen las tablas, aunque no vayamos a configurarlo aquí
       $this->almacen = new almacen();
       $this->cuenta_banco = new cuenta_banco();
       $this->divisa = new divisa();
@@ -56,13 +39,13 @@ class admin_empresa extends fs_controller
       
       if( isset($_POST['nombre']) )
       {
-         /// guardamos solamente lo básico, ya que facturacion_base no está activado
+
          $this->empresa->nombre = $_POST['nombre'];
          $this->empresa->nombrecorto = $_POST['nombrecorto'];
          $this->empresa->web = $_POST['web'];
          $this->empresa->email = $_POST['email'];
          
-         /// configuración de email
+
          $this->empresa->email_config['mail_password'] = $_POST['mail_password'];
          $this->empresa->email_config['mail_bcc'] = $_POST['mail_bcc'];
          $this->empresa->email_config['mail_firma'] = $_POST['mail_firma'];
@@ -86,7 +69,7 @@ class admin_empresa extends fs_controller
    {
       if( $this->empresa->can_send_mail() )
       {
-         /// Es imprescindible OpenSSL para enviar emails con los principales proveedores
+
          if( extension_loaded('openssl') )
          {
             $mail = new PHPMailer();
@@ -136,11 +119,6 @@ class admin_empresa extends fs_controller
                           . 'Para superar esta situación debes crear y usar una '
                           . '<a href="https://support.google.com/accounts/answer/185833?hl=es" '
                           . 'target="_blank">contraseña de aplicación</a>');
-               }
-               else
-               {
-                  $this->new_error_msg("¿<a href='https://www.facturascripts.com/comm3/index.php?page=community_item&id=74'"
-                          . " target='_blank'>Necesitas ayuda</a>?");
                }
             }
          }

@@ -1,0 +1,174 @@
+{include="header"}
+
+<script src="plugins/kardex/view/js/bootstrap-select.min.js" type="text/javascript"></script>
+<script src="plugins/kardex/view/js/locale/grid.locale-es.js" type="text/javascript"></script>
+<script src="plugins/kardex/view/js/plugins/jquery.jqGrid.min.js" type="text/javascript"></script>
+
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="btn-group">
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
+               <span class="glyphicon glyphicon-refresh"></span>
+            </a>
+         </div>
+
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="page-header">
+            <h1>
+               <span class='glyphicon glyphicon-equalizer'></span>
+
+            </h1>
+         </div>
+       <button class="new_per">Nuevo Personal</button>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div id="kardex-resultados">
+            <table id="grid_kardex"></table>
+            <div id="grid_kardex_pager"></div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal" id="modal_create">
+   <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+         <div class="modal-body" id='modal_proceso_kardex_body'>
+            <div id="divProgress" class="text-left"></div>
+            <div class="progress progress-popup">
+               <div class="progress-bar progress-bar-striped active" id="progressor"></div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal_create_personal">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <form id="create_per" method="post" action='{$fsc->url()}'>
+            <input type="hidden" name="register_personal" value="TRUE">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Trabajador</h4>
+         </div>
+         <div class="modal-body bg-info">
+            <div class="row">
+               <div class="col-sm-12">
+                  <div class="form-group col-xs-6 col-md-6">
+                   <label for='nombre_trabajador' class="control-label">Nombre</label>
+                   <input type="text" class="form-control " name='nombre' id="nombre_trabajador">
+                     <label for='apellido_trabajador' class="control-label">Apellido</label>
+                     <input type="text" class="form-control " name='apellido' id="apellido_trabajador">
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="submit" id="b_calcular_kardex" data-disable="true" class="btn btn-sm btn-warning">
+               <span class='glyphicon glyphicon-equalizer'></span> &nbsp; Registrar
+            </button>
+         </div>
+         </form>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal_opciones_kardex">
+   <div class="modal-dialog">
+      <div class="modal-content">
+        <form class="form" id="f_opciones_kardex" role="form" action="{$fsc->url()}" method="POST">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Opciones de Calculo de Inventario Diario</h4>
+         </div>
+         <div class="modal-body bg-warning">
+            <p align="justify">
+               Aqui puede indicar una hora espec&iacute;fica para ejecutar autom&aacute;ticamente el Calculo de Inventario Diario, pero para esto debe tener correctamente configurado
+               el proceso de cron al instalar FacturaScripts, tenga en cuenta que si su cron esta configurado para ejecutarse una sola vez al d&iacute;a, entonces debe colocar
+               la hora de ejecuci&oacute;n del Calculo de Inventario a la hora que corre el cron:
+            </p>
+            <hr/>
+            <div class="row">
+               <div class="col-sm-6">
+                  <label class="control-label"><b>Se ejecuta autom&aacute;ticamente?</b></label>
+               </div>
+               <div class="col-sm-6">
+                  <div class="form-group" id="kardex_cron_ops">
+                     <label class="control-label">
+                        <input type="radio" name='kardex_cron' value='TRUE'{if="$fsc->kardex_cron"} checked=''{/if}>
+                        Si
+                     </label>
+                     &nbsp;
+                     <label class="control-label">
+                        <input type="radio" name='kardex_cron' value=''{if="!$fsc->kardex_cron"} checked=''{/if}>
+                        No
+                     </label>
+                  </div>
+               </div>
+            </div>
+            <div class="form-group">
+               <label class="control-label col-sm-6 pull-left" for='kardex_programado'><b>Hora de Ejecuci&oacute;n:</b></label>
+               <select class="control-label selectpicker col-xs-2" name='kardex_programado' style="width: 20px;">
+                  {loop="$fsc->loop_horas"}
+                     <option value="{$value}" {if="$fsc->kardex_programado == $value"}selected{/if}>{$value}</option>
+                  {/loop}
+               </select>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="submit" data-disable="true" class="btn btn-sm btn-warning">
+               <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Guardar Cambios
+            </button>
+         </div>
+        </form>
+      </div>
+   </div>
+</div>
+<script>
+   $(document).on('ready',function(){
+      $('.new_per').click(function () {
+         $('#modal_create_personal').modal('show');
+      });
+
+      $('#create_per').submit(function (e) {
+         e.preventDefault();
+        var datos = $('#create_per').serializeArray();
+         set_personal(datos);
+      });
+   });
+
+   function set_personal(datos) {
+      $('#modal_create_personal').modal('hide');
+      $.ajax({
+         type: 'POST',
+         url: '{$fsc->url()}',
+         dataType : 'json',
+         data : datos,
+         success: function (d) {
+            console.log("exito");
+            console.log(d)
+         },
+         error: function (d) {
+            console.log("error");
+            console.log(d);
+         }
+
+
+      });
+   }
+</script>
+
+
+{include="footer"}

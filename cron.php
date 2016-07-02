@@ -1,28 +1,9 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 echo 'Iniciando cron...';
 
-/// accedemos al directorio de FacturaScripts
 chdir(__DIR__);
 
-/// cargamos las constantes de configuración
 require_once 'config.php';
 require_once 'base/config2.php';
 
@@ -43,24 +24,17 @@ if( $db->connect() )
 {
    $fsvar = new fs_var();
    $cron_vars = $fsvar->array_get( array('cron_exists' => FALSE, 'cron_lock' => FALSE, 'cron_error' => FALSE) );
-   
+   echo json_encode($cron_vars);
    if($cron_vars['cron_lock'])
    {
       echo "ERROR: Ya hay un cron en ejecución. Si crees que es un error,"
       . " ve a Admin > Información del sistema para solucionar el problema.";
-      
-      /// marcamos el error en el cron
+  
       $cron_vars['cron_error'] = 'TRUE';
    }
    else
    {
-      /**
-       * He detectado que a veces, con el plugin kiwimaru,
-       * el proceso cron tarda más de una hora, y por tanto se encadenan varios
-       * procesos a la vez. Para evitar esto, uso la entrada cron_lock.
-       * Además uso la entrada cron_exists para marcar que alguna vez se ha ejecutado el cron,
-       * y cron_error por si hubiese algún fallo.
-       */
+   
       $cron_vars['cron_lock'] = 'TRUE';
       $cron_vars['cron_exists'] = 'TRUE';
       
@@ -83,16 +57,14 @@ if( $db->connect() )
       $fs_default_items->set_codpais( $empresa->codpais );
       $fs_default_items->set_codserie( $empresa->codserie );
       
-      /*
-       * Ahora ejecutamos el cron de cada plugin que tenga cron y esté activado
-       */
-      foreach($GLOBALS['plugins'] as $plugin)
+      
+      foreach($GLOBALS['modulos'] as $plugin)
       {
-         if( file_exists('plugins/'.$plugin.'/cron.php') )
+         if( file_exists('modulos/'.$plugin.'/cron.php') )
          {
             echo "\n***********************\nEjecutamos el cron.php del plugin ".$plugin."\n";
             
-            include 'plugins/'.$plugin.'/cron.php';
+            include 'modulos/'.$plugin.'/cron.php';
             
             echo "\n***********************";
          }

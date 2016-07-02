@@ -1,21 +1,4 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 require_once 'base/fs_cache.php';
 require_once 'base/fs_db2.php';
@@ -32,16 +15,10 @@ require_model('fs_extension.php');
 require_model('fs_log.php');
 require_model('fs_var.php');
 
-/**
- * La clase principal de la que deben heredar todos los controladores
- * (las páginas) de FacturaScripts.
- */
+
 class fs_controller
 {
-   /**
-    * Este objeto permite acceso directo a la base de datos.
-    * @var fs_db2
-    */
+   
    protected $db;
    private $uptime;
    private $errors;
@@ -50,62 +27,17 @@ class fs_controller
    private $last_changes;
    private $simbolo_divisas;
    
-   /**
-    * El usuario que ha hecho login
-    * @var fs_user
-    */
    public $user;
-   
-   /**
-    * El elemento del menú de esta página
-    * @var fs_page
-    */
    public $page;
-   
-   /**
-    * Contiene el menú de FacturaScripts
-    * @var type 
-    */
    protected $menu;
-   
-   /**
-    * Indica que archivo HTML hay que cargar
-    * @var type 
-    */
    public $template;
-   
-   /**
-    * La cadena obtenida del formulario de búsqueda
-    * @var type 
-    */
    public $query;
-   
-   /**
-    * La empresa
-    * @var empresa
-    */
    public $empresa;
    public $default_items;
-   
-   /**
-    * Este objeto permite interactuar con memcache
-    * @var fs_cache
-    */
    protected $cache;
-   
-   /**
-    * Listado de extensiones de la página
-    */
    public $extensions;
    
-   /**
-    * @param type $name sustituir por __CLASS__
-    * @param type $title es el título de la página, y el texto que aparecerá en el menú
-    * @param type $folder es el menú dónde quieres colocar el acceso directo
-    * @param type $admin OBSOLETO
-    * @param type $shmenu debe ser TRUE si quieres añadir el acceso directo en el menú
-    * @param type $important debe ser TRUE si quieres que aparezca en el menú de destacado
-    */
+ 
    public function __construct($name = '', $title = 'home', $folder = '', $admin = FALSE, $shmenu = TRUE, $important = FALSE)
    {
       $tiempo = explode(' ', microtime());
@@ -256,10 +188,7 @@ class fs_controller
       }
    }
    
-   /**
-    * Devuelve la versión de FacturaScripts
-    * @return type versión de FacturaScripts
-    */
+   
    public function version()
    {
       if( file_exists('VERSION') )
@@ -271,18 +200,11 @@ class fs_controller
          return '0';
    }
    
-   /**
-    * Cierra la conexión con la base de datos.
-    */
    public function close()
    {
       $this->db->close();
    }
    
-   /**
-    * Muestra al usuario un mensaje de error
-    * @param type $msg el mensaje a mostrar
-    */
    public function new_error_msg($msg = FALSE, $tipo = 'error', $alerta = FALSE)
    {
       if($msg)
@@ -304,10 +226,7 @@ class fs_controller
       }
    }
    
-   /**
-    * Devuelve la lista de errores
-    * @return type lista de errores
-    */
+  
    public function get_errors()
    {
       $full = array_merge( $this->errors, $this->db->get_errors() );
@@ -319,11 +238,7 @@ class fs_controller
       
       return $full;
    }
-   
-   /**
-    * Muestra un mensaje al usuario
-    * @param type $msg mensaje a mostrar
-    */
+ 
    public function new_message($msg=FALSE, $save=FALSE, $tipo = 'msg')
    {
       if($msg)
@@ -346,20 +261,12 @@ class fs_controller
          }
       }
    }
-   
-   /**
-    * Devuelve la lista de mensajes
-    * @return type lista de mensajes
-    */
+
    public function get_messages()
    {
       return $this->messages;
    }
-   
-   /**
-    * Muestra un consejo al usuario
-    * @param type $msg el consejo a mostrar
-    */
+
    public function new_advice($msg=FALSE)
    {
       if($msg)
@@ -368,29 +275,18 @@ class fs_controller
       }
    }
    
-   /**
-    * Devuelve la lista de consejos
-    * @return type lista de consejos
-    */
    public function get_advices()
    {
       return $this->advices;
    }
    
-   /**
-    * Devuelve la URL de esta página (index.php?page=LO-QUE-SEA)
-    * @return type
-    */
+
    public function url()
    {
       return $this->page->url();
    }
    
-   /**
-    * Una IP será baneada si falla más de 5 intentos de login en menos de 10 minutos
-    * @param type $ips es un array de IP;intentos;hora
-    * @return boolean
-    */
+
    private function ip_baneada(&$ips)
    {
       $baneada = FALSE;
@@ -423,10 +319,7 @@ class fs_controller
       return $baneada;
    }
    
-   /**
-    * Baneamos las IPs que fallan más de 5 intentos de login en 10 minutos
-    * @param type $ips es un array de IP;intentos;hora
-    */
+
    private function banear_ip(&$ips)
    {
       $file = fopen('tmp/'.FS_TMP_NAME.'ip.log', 'w');
@@ -453,12 +346,7 @@ class fs_controller
          fclose($file);
       }
    }
-   
-   /**
-    * Devuelve TRUE si la IP proporcionada está en la lista de IPs permitidas.
-    * La lista de IPs permitidas están en Admin > Panel de control > Avanzado.
-    * @param type $ip
-    */
+
    private function ip_in_whitelist($ip)
    {
       if(FS_IP_WHITELIST == '*')
@@ -472,10 +360,6 @@ class fs_controller
       }
    }
    
-   /**
-    * Devuelve TRUE si el usuario realmente tiene acceso a esta página
-    * @return type
-    */
    private function log_in()
    {
       $ips = array();
@@ -487,7 +371,7 @@ class fs_controller
       }
       else if( isset($_POST['user']) AND isset($_POST['password']) )
       {
-         if( FS_DEMO ) /// en el modo demo nos olvidamos de la contraseña
+         if( FS_DEMO ) 
          {
             $user = $this->user->get($_POST['user']);
             if( !$user )
@@ -592,7 +476,7 @@ class fs_controller
          else
          {
             $this->new_error_msg('¡El usuario '.$_COOKIE['user'].' no existe!');
-            $this->log_out();
+            $this->log_out(TRUE);
             $this->user->clean_cache(TRUE);
             $this->cache->clean();
          }
@@ -600,77 +484,67 @@ class fs_controller
       
       return $this->user->logged_on;
    }
-   
-   /**
-    * Gestiona el cierre de sesión
-    */
-   private function log_out()
+
+   private function log_out($rmuser = FALSE)
    {
+      /// borramos las cookies
       setcookie('logkey', '', time()-FS_COOKIES_EXPIRE);
+      if( isset($_SERVER['REQUEST_URI']) )
+      {
+         $aux = parse_url( str_replace('/index.php', '', $_SERVER['REQUEST_URI']) );
+         setcookie('logkey', '', time()-FS_COOKIES_EXPIRE, $aux['path'].'/');
+      }
       
+      /// ¿Eliminamos la cookie del usuario?
+      if($rmuser)
+      {
+         setcookie('user', '', time()-FS_COOKIES_EXPIRE);
+         if( isset($_SERVER['REQUEST_URI']) )
+         {
+            $aux = parse_url( str_replace('/index.php', '', $_SERVER['REQUEST_URI']) );
+            setcookie('user', '', time()-FS_COOKIES_EXPIRE, $aux['path'].'/');
+         }
+      }
+      
+      /// guardamos el evento en el log
       $fslog = new fs_log();
+      $fslog->tipo = 'login';
+      $fslog->detalle = 'El usuario ha cerrado la sesión.';
+      $fslog->ip = $_SERVER['REMOTE_ADDR'];
       
       if( isset($_COOKIE['user']) )
       {
          $fslog->usuario = $_COOKIE['user'];
       }
       
-      $fslog->tipo = 'login';
-      $fslog->detalle = 'El usuario ha cerrado la sesión.';
-      $fslog->ip = $_SERVER['REMOTE_ADDR'];
       $fslog->save();
    }
-   
-   /**
-    * Devuelve la duración de la ejecución de la página
-    * @return type un string con la duración de la ejecución
-    */
    public function duration()
    {
       $tiempo = explode(" ", microtime());
       return (number_format($tiempo[1] + $tiempo[0] - $this->uptime, 3) . ' s');
    }
-   
-   /**
-    * Devuelve el número de consultas SQL (SELECT) que se han ejecutado
-    * @return type
-    */
+  
    public function selects()
    {
       return $this->db->get_selects();
    }
-   
-   /**
-    * Devuleve el número de transacciones SQL que se han ejecutado
-    * @return type
-    */
+  
    public function transactions()
    {
       return $this->db->get_transactions();
    }
    
-   /**
-    * Devuelve el listado de consultas SQL que se han ejecutados
-    * @return type lista de consultas SQL
-    */
    public function get_db_history()
    {
       return $this->db->get_history();
    }
-   
-   /**
-    * Carga el menú de facturaScripts
-    * @param type $reload TRUE si quieres recargar
-    */
+
    protected function load_menu($reload=FALSE)
    {
       $this->menu = $this->user->get_menu($reload);
    }
-   
-   /**
-    * Devuelve la lista de menús
-    * @return type lista de menús
-    */
+ 
    public function folders()
    {
       $folders = array();
@@ -683,12 +557,7 @@ class fs_controller
       }
       return $folders;
    }
-   
-   /**
-    * Devuelve la lista de elementos de un menú seleccionado
-    * @param type $f el menú seleccionado
-    * @return type lista de elementos del menú
-    */
+ 
    public function pages($f='')
    {
       $pages = array();
@@ -701,26 +570,17 @@ class fs_controller
       }
       return $pages;
    }
-   
-   /**
-    * Función que se ejecuta si el usuario no ha hecho login
-    */
+  
    protected function public_core()
    {
       
    }
-   
-   /**
-    * Esta es la función principal que se ejecuta cuando el usuario ha hecho login
-    */
+  
    protected function private_core()
    {
       
    }
-   
-   /**
-    * Redirecciona a la página predeterminada para el usuario
-    */
+ 
    public function select_default_page()
    {
       if( $this->db->connected() )
@@ -731,11 +591,7 @@ class fs_controller
             if( is_null($this->user->fs_page) )
             {
                $page = 'admin_home';
-               
-               /*
-                * Cuando un usuario no tiene asignada una página por defecto,
-                * se selecciona la primera página del menú.
-                */
+          
                foreach($this->menu as $p)
                {
                   if($p->show_on_menu)
@@ -751,16 +607,9 @@ class fs_controller
          }
       }
    }
-   
-   /**
-    * Establecemos los elementos por defecto, pero no se guardan.
-    * Para guardarlos hay que usar las funciones fs_controller::save_lo_que_sea().
-    * La clase fs_default_items sólo se usa para indicar valores
-    * por defecto a los modelos.
-    */
+
    private function set_default_items()
    {
-      /// gestionamos la página de inicio
       if( isset($_GET['default_page']) )
       {
          if($_GET['default_page'] == 'FALSE')
@@ -815,147 +664,81 @@ class fs_controller
       $this->default_items->set_codserie( $this->empresa->codserie );
       $this->default_items->set_coddivisa( $this->empresa->coddivisa );
    }
-   
-   /**
-    * Establece un ejercicio como predeterminado para este usuario.
-    * @deprecated since version 2015.039
-    * @param type $cod el código del ejercicio
-    */
+
    protected function save_codejercicio($cod)
    {
       $this->new_error_msg('fs_controller::save_codejercicio() es una función obsoleta.');
    }
    
-   /**
-    * Establece un almacén como predeterminado para este usuario.
-    * @param type $cod el código del almacén
-    */
+  
    protected function save_codalmacen($cod)
    {
       setcookie('default_almacen', $cod, time()+FS_COOKIES_EXPIRE);
       $this->default_items->set_codalmacen($cod);
    }
    
-   /**
-    * Establece un cliente como predeterminado para este usuario.
-    * @deprecated since version 2015.039
-    * @param type $cod el código del cliente
-    */
+  
    protected function save_codcliente($cod)
    {
       $this->new_error_msg('fs_controller::save_codcliente() es una función obsoleta.');
    }
    
-   /**
-    * Establece una divisa como predeterminada para este usuario.
-    * @deprecated since version 2015.039
-    * @param type $cod el código de la divisa
-    */
+  
    protected function save_coddivisa($cod)
    {
       $this->new_error_msg('fs_controller::save_coddivisa() es una función obsoleta.');
    }
    
-   /**
-    * Establece una familia como predeterminada para este usuario.
-    * @deprecated since version 2015.039
-    * @param type $cod el código de la familia
-    */
+  
    protected function save_codfamilia($cod)
    {
       $this->new_error_msg('fs_controller::save_codfamilia() es una función obsoleta.');
    }
    
-   /**
-    * Establece una forma de pago como predeterminada para este usuario.
-    * @param type $cod el código de la forma de pago
-    */
+   
    protected function save_codpago($cod)
    {
       setcookie('default_formapago', $cod, time()+FS_COOKIES_EXPIRE);
       $this->default_items->set_codpago($cod);
    }
-   
-   /**
-    * Establece un impuesto (IVA) como predeterminado para este usuario.
-    * @param type $cod el código del impuesto
-    */
+  
    protected function save_codimpuesto($cod)
    {
       setcookie('default_impuesto', $cod, time()+FS_COOKIES_EXPIRE);
       $this->default_items->set_codimpuesto($cod);
    }
-   
-   /**
-    * Establece un código de país como predeterminado para este usuario.
-    * @deprecated since version 2015.039
-    * @param type $cod el código del país
-    */
+
    protected function save_codpais($cod)
    {
       $this->new_error_msg('fs_controller::save_codpais() es una función obsoleta.');
    }
    
-   /**
-    * Establece un proveedor como predeterminado para este usuario.
-    * @deprecated since version 2015.039
-    * @param type $cod el código del proveedor
-    */
    protected function save_codproveedor($cod)
    {
       $this->new_error_msg('fs_controller::save_codproveedor() es una función obsoleta.');
    }
-   
-   /**
-    * Establece una serie como predeterminada para este usuario.
-    * @deprecated since version 2015.039
-    * @param type $cod el código de la serie
-    */
+ 
    protected function save_codserie($cod)
    {
       $this->new_error_msg('fs_controller::save_codserie() es una función obsoleta.');
    }
-   
-   /**
-    * Devuelve la fecha actual
-    * @return type la fecha en formato día-mes-año
-    */
+
    public function today()
    {
       return date('d-m-Y');
    }
-   
-   /**
-    * Devuelve la hora actual
-    * @return type la hora en formato hora:minutos:segundos
-    */
+
    public function hour()
    {
       return Date('H:i:s');
    }
    
-   /**
-    * Devuelve un string aleatorio de longitud $length
-    * @param type $length la longitud del string
-    * @return type la cadena aleatoria
-    */
    public function random_string($length = 30)
    {
       return mb_substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
               0, $length);
    }
    
-   /**
-    * He detectado que algunos navegadores, en algunos casos, envían varias veces la
-    * misma petición del formulario. En consecuencia se crean varios modelos (asientos,
-    * albaranes, etc...) con los mismos datos, es decir, duplicados.
-    * Para solucionarlo añado al formulario un campo petition_id con una cadena
-    * de texto aleatoria. Al llamar a esta función se comprueba si esa cadena
-    * ya ha sido almacenada, de ser así devuelve TRUE, así no hay que gabar los datos,
-    * si no, se almacena el ID y se devuelve FALSE.
-    * @param type $id el identificador de la petición
-    * @return boolean TRUE si la petición está duplicada
-    */
    protected function duplicated_petition($id)
    {
       $ids = $this->cache->get_array('petition_ids');
@@ -970,42 +753,41 @@ class fs_controller
          return FALSE;
       }
    }
-   
-   /**
-    * Devuelve información del sistema para el informe de errores
-    * @return type la información del sistema
-    */
+  
    public function system_info()
    {
-      $txt = 'facturascripts: '.$this->version()."\n";
+      $txt = 'datos'.$this->version()."\n";
       
-      if($this->user->logged_on)
+      if( $this->db->connect() )
       {
-         $txt .= 'os: '.php_uname()."\n";
-         $txt .= 'php: '.phpversion()."\n";
-         $txt .= 'database type: '.FS_DB_TYPE."\n";
-         $txt .= 'database version: '.$this->db->version()."\n";
-         
-         if( $this->cache->connected() )
+         if($this->user->logged_on)
          {
-            $txt .= "memcache: YES\n";
-            $txt .= 'memcache version: '.$this->cache->version()."\n";
-         }
-         else
-            $txt .= "memcache: NO\n";
-         
-         if( function_exists('curl_init') )
-         {
-            $txt .= "curl: YES\n";
-         }
-         else
-            $txt .= "curl: NO\n";
-         
-         $txt .= 'plugins: '.join(',', $GLOBALS['plugins'])."\n";
-         
-         if( isset($_SERVER['REQUEST_URI']) )
-         {
-            $txt .= 'url: '.$_SERVER['REQUEST_URI']."\n------";
+            $txt .= 'os: '.php_uname()."\n";
+            $txt .= 'php: '.phpversion()."\n";
+            $txt .= 'database type: '.FS_DB_TYPE."\n";
+            $txt .= 'database version: '.$this->db->version()."\n";
+            
+            if( $this->cache->connected() )
+            {
+               $txt .= "memcache: YES\n";
+               $txt .= 'memcache version: '.$this->cache->version()."\n";
+            }
+            else
+               $txt .= "memcache: NO\n";
+            
+            if( function_exists('curl_init') )
+            {
+               $txt .= "curl: YES\n";
+            }
+            else
+               $txt .= "curl: NO\n";
+            
+            $txt .= 'modulos: '.join(',', $GLOBALS['modulos'])."\n";
+            
+            if( isset($_SERVER['REQUEST_URI']) )
+            {
+               $txt .= 'url: '.$_SERVER['REQUEST_URI']."\n------";
+            }
          }
       }
       
@@ -1017,12 +799,6 @@ class fs_controller
       return str_replace('"', "'", $txt);
    }
    
-   /**
-    * Devuelve el símbolo de divisa predeterminado
-    * o bien el símbolo de la divisa seleccionada.
-    * @param type $coddivisa
-    * @return string
-    */
    public function simbolo_divisa($coddivisa = FALSE)
    {
       if(!$coddivisa)
@@ -1048,15 +824,7 @@ class fs_controller
       }
    }
    
-   /**
-    * Devuelve un string con el precio en el formato predefinido y con la
-    * divisa seleccionada (o la predeterminada).
-    * @param type $precio
-    * @param type $coddivisa
-    * @param type $simbolo
-    * @param type $dec nº de decimales
-    * @return type
-    */
+ 
    public function show_precio($precio=0, $coddivisa=FALSE, $simbolo=TRUE, $dec=FS_NF0)
    {
       if($coddivisa === FALSE)
@@ -1083,14 +851,7 @@ class fs_controller
             return $coddivisa.' '.number_format($precio, $dec, FS_NF1, FS_NF2);
       }
    }
-   
-   /**
-    * Devuelve un string con el número en el formato de número predeterminado.
-    * @param type $num
-    * @param type $decimales
-    * @param type $js
-    * @return type
-    */
+  
    public function show_numero($num=0, $decimales=FS_NF0, $js=FALSE)
    {
       if($js)
@@ -1100,13 +861,7 @@ class fs_controller
       else
          return number_format($num, $decimales, FS_NF1, FS_NF2);
    }
-   
-   /**
-    * Añade un elemento a la lista de cambios del usuario.
-    * @param type $txt texto descriptivo.
-    * @param type $url URL del elemento (albarán, factura, artículos...).
-    * @param type $nuevo TRUE si el elemento es nuevo, FALSE si se ha modificado.
-    */
+ 
    public function new_change($txt, $url, $nuevo=FALSE)
    {
       $this->get_last_changes();
@@ -1121,8 +876,7 @@ class fs_controller
       }
       else
          array_unshift($this->last_changes, array('texto' => ucfirst($txt), 'url' => $url, 'nuevo' => $nuevo, 'cambio' => date('d-m-Y H:i:s')) );
-      
-      /// sólo queremos 10 elementos
+     
       $num = 10;
       foreach($this->last_changes as $i => $value)
       {
@@ -1138,10 +892,7 @@ class fs_controller
       
       $this->cache->set('last_changes_'.$this->user->nick, $this->last_changes);
    }
-   
-   /**
-    * Devuelve la lista con los últimos cambios del usuario.
-    */
+
    public function get_last_changes()
    {
       if( !isset($this->last_changes) )
@@ -1152,57 +903,53 @@ class fs_controller
       return $this->last_changes;
    }
    
-   /**
-    * Elimina la lista con los últimos cambios del usuario.
-    */
+  
    public function clean_last_changes()
    {
       $this->last_changes = array();
       $this->cache->delete('last_changes_'.$this->user->nick);
    }
    
-   /**
-    * Devuelve TRUE si hay actualizaciones pendientes (sólo si eres admin).
-    * @return boolean
-    */
+   
    public function check_for_updates()
    {
       if($this->user->admin)
       {
-         $fsvar = new fs_var();
-         return $fsvar->simple_get('updates');
+         $desactivado = FALSE;
+         if( defined('FS_DISABLE_MOD_PLUGINS') )
+         {
+            $desactivado = FS_DISABLE_MOD_PLUGINS;
+         }
+         
+         if($desactivado)
+         {
+            return FALSE;
+         }
+         else
+         {
+            $fsvar = new fs_var();
+            return $fsvar->simple_get('updates');
+         }
       }
       else
          return FALSE;
    }
-   
-   /**
-    * Busca en la lista de plugins activos, en orden inverso de prioridad
-    * (el último plugin activo tiene más prioridad que el primero)
-    * y nos devuelve la ruta del archivo javascript que le solicitamos.
-    * Así usamos el archivo del plugin con mayor prioridad.
-    * @param type $filename
-    * @return type
-    */
+
    public function get_js_location($filename)
    {
       $found = FALSE;
-      foreach($GLOBALS['plugins'] as $plugin)
+      foreach($GLOBALS['modulos'] as $plugin)
       {
-         if( file_exists('plugins/'.$plugin.'/view/js/'.$filename) )
+         if( file_exists('modulos/'.$plugin.'/view/js/'.$filename) )
          {
-            return 'plugins/'.$plugin.'/view/js/'.$filename;
+            return FS_PATH.'modulos/'.$plugin.'/view/js/'.$filename;
          }
       }
-      
-      /// si no está en los plugins estará en el núcleo
-      return 'view/js/'.$filename;
+
+      /// si no está en los modulos estará en el núcleo
+      return FS_PATH.'view/js/'.$filename;
    }
-   
-   /**
-    * Devuelve el tamaño máximo permitido para subir archivos.
-    * @return type
-    */
+
    public function get_max_file_upload()
    {
       $max = intval( ini_get('post_max_size') );

@@ -1,120 +1,28 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 require_model('agente.php');
 require_model('ejercicio.php');
 require_model('fs_access.php');
 require_model('fs_page.php');
 
-/**
- * Usuario de facturaScripts. Puede estar asociado a un agente.
- */
+
 class fs_user extends fs_model
 {
-   /**
-    * Clave primaria. Varchar (12).
-    * @var type 
-    */
+   
    public $nick;
-   
-   /**
-    * Contraseña, en sha1
-    * @var type 
-    */
    public $password;
-   
-   /**
-    * Email del usuario.
-    * @var type 
-    */
    public $email;
-   
-   /**
-    * Clave de sesión. El cliente se la guarda en una cookie,
-    * sirve para no tener que guardar la contraseña.
-    * Se regenera cada vez que el cliente inicia sesión. Así se
-    * impide que dos personas accedan con el mismo usuario.
-    * @var type 
-    */
    public $log_key;
-   
-   /**
-    * TRUE -> el usuario ha iniciado sesión
-    * No se guarda en la base de datos
-    * @var type 
-    */
    public $logged_on;
-   
-   /**
-    * Código del agente/empleado asociado
-    * @var type 
-    */
    public $codagente;
-   
-   /**
-    * El objeto agente asignado. Hay que llamar previamente la función get_agente().
-    * @var type 
-    */
    public $agente;
-   
-   /**
-    * TRUE -> el usuario es un administrador
-    * @var type 
-    */
    public $admin;
-   
-   /**
-    * Fecha del último login.
-    * @var type 
-    */
    public $last_login;
-   
-   /**
-    * Hora del último login.
-    * @var type 
-    */
    public $last_login_time;
-   
-   /**
-    * Última IP usada
-    * @var type 
-    */
    public $last_ip;
-   
-   /**
-    * Último identificador de navegador usado
-    * @var type 
-    */
    public $last_browser;
-   
-   /**
-    * Página de inicio.
-    * @var type 
-    */
    public $fs_page;
-   
-   /**
-    * Plantilla CSS predeterminada.
-    * @var type 
-    */
    public $css;
-   
    private $menu;
    
    public function __construct($a = FALSE)
@@ -177,15 +85,11 @@ class fs_user extends fs_model
       $this->agente = NULL;
    }
    
-   /**
-    * Inserta valores por defecto a la tabla, en el proceso de creación de la misma.
-    * @return type
-    */
+ 
    protected function install()
    {
       $this->clean_cache(TRUE);
       
-      /// Esta tabla tiene claves ajenas a agentes y fs_pages
       new agente();
       new fs_page();
       
@@ -211,11 +115,6 @@ class fs_user extends fs_model
       else
          return 'index.php?page=admin_user&snick='.$this->nick;
    }
-   
-   /**
-    * Devuelve el agente/empleado asociado
-    * @return boolean|agente
-    */
    public function get_agente()
    {
       if( isset($this->agente) )
@@ -265,12 +164,6 @@ class fs_user extends fs_model
       else
          return '#';
    }
-   
-   /**
-    * Devuelve el menú del usuario, el conjunto de páginas a las que tiene acceso.
-    * @param type $reload
-    * @return type
-    */
    public function get_menu($reload=FALSE)
    {
       if( !isset($this->menu) OR $reload)
@@ -301,39 +194,22 @@ class fs_user extends fs_model
       }
       return $this->menu;
    }
-   
-   /**
-    * Devuelve TRUE si el usuario tiene acceso a la página solicitada.
-    * @param type $page_name
-    * @return boolean
-    */
+  
    public function have_access_to($page_name)
    {
-      if($this->admin OR FS_DEMO)
+      $status = FALSE;
+      foreach($this->get_menu() as $m)
       {
-         $status = TRUE;
-      }
-      else
-      {
-         $status = FALSE;
-         foreach($this->get_menu() as $m)
+         if($m->name == $page_name)
          {
-            if($m->name == $page_name)
-            {
-               $status = TRUE;
-               break;
-            }
+            $status = TRUE;
+            break;
          }
       }
       
       return $status;
    }
-   
-   /**
-    * Devuelve TRUE si el usuario tiene permiso para eliminar elementos en la página solicitada.
-    * @param type $page_name
-    * @return type
-    */
+
    public function allow_delete_on($page_name)
    {
       if($this->admin OR FS_DEMO)
@@ -356,10 +232,6 @@ class fs_user extends fs_model
       return $status;
    }
    
-   /**
-    * Devuelve la lista de accesos permitidos del cliente.
-    * @return type
-    */
    public function get_accesses()
    {
       $access = new fs_access();
@@ -392,11 +264,7 @@ class fs_user extends fs_model
          return FALSE;
       }
    }
-   
-   /*
-    * Modifica y guarda la fecha de login si tiene una diferencia de más de una hora
-    * con la fecha guardada, así se evita guardar en cada consulta
-    */
+ 
    public function update_login()
    {
       $ltime = strtotime($this->last_login.' '.$this->last_login_time);
@@ -418,11 +286,7 @@ class fs_user extends fs_model
          $this->save();
       }
    }
-   
-   /**
-    * Genera una nueva clave de login, para usar en lugar de la contraseña (via cookie),
-    * esto impide que dos o más personas utilicen el mismo usuario al mismo tiempo.
-    */
+  
    public function new_logkey()
    {
       if( is_null($this->log_key) OR !FS_DEMO )

@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Document   : formaspago.xml
-    Description:
-        Estructura de la tabla formaspago.
--->
 <tabla>
    <columna>
       <nombre>codpago</nombre>

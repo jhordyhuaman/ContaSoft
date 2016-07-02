@@ -3,13 +3,12 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <title>{$fsc->page->title} &lsaquo; {if="$fsc->empresa->nombrecorto"}{$fsc->empresa->nombrecorto}{else}{$fsc->empresa->nombre}{/if}</title>
-   <meta name="description" content="FacturaScripts es un software de facturación y contabilidad para pymes. Es software libre bajo licencia GNU/LGPL." />
    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <meta name="generator" content="FacturaScripts" />
    <link rel="shortcut icon" href="view/img/favicon.ico" />
    <link rel="stylesheet" href="{$fsc->user->css}" />
-   <link rel="stylesheet" href="view/font-awesome/css/font-awesome.min.css" />
+   <link rel="stylesheet" href="view/css/font-awesome.min.css" />
    <link rel="stylesheet" href="view/css/datepicker.css" />
+   <link rel="stylesheet" href="view/css/flat-ui.css" />
    <link rel="stylesheet" href="view/css/custom.css" />
    <script type="text/javascript" src="view/js/jquery.min.js"></script>
    <script type="text/javascript" src="view/js/bootstrap.min.js"></script>
@@ -36,7 +35,7 @@
    {/loop}
 </head>
 <body>
-   <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+   <nav class="navbar navbar-inverse navbar-embossed" role="navigation">
       <div class="container-fluid">
          <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -45,9 +44,10 @@
                <span class="icon-bar"></span>
                <span class="icon-bar"></span>
             </button>
+
             <a class="navbar-brand" href="index.php">
-               <span class="glyphicon glyphicon-home"></span> &nbsp;
-               <span class="hidden-sm">{if="FS_DEMO"}DEMO{elseif="$fsc->empresa->nombrecorto"}{$fsc->empresa->nombrecorto}{else}{$fsc->empresa->nombre}{/if}</span>
+
+               <span class="hidden-sm"><img src="./view/img/logo.png" width="50" height="50" style="margin-top: -8px;"/>{$fsc->empresa->nombre}</span>
             </a>
          </div>
          
@@ -57,7 +57,7 @@
                <li class="dropdown{if="$value1==$fsc->page->folder"} active{/if}">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                      {if="$value1=='admin'"}
-                     <span class="glyphicon glyphicon-wrench" title="Administración"></span>
+                      <span class="glyphicon glyphicon-wrench" title="Administración" ></span>
                      {else}
                      <span class="text-capitalize">{$value1}</span>
                      {/if}
@@ -69,7 +69,7 @@
                   </ul>
                </li>
                {/loop}
-               {if="count($GLOBALS['plugins'])>0"}
+               {if="count($GLOBALS['modulos'])>0"}
                <li class="dropdown hidden-sm">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" title="Acceso rápido">
                      <span class="glyphicon glyphicon-star"></span>
@@ -91,14 +91,7 @@
             </ul>
             
             <ul class="nav navbar-nav navbar-right">
-               {if="$fsc->check_for_updates()"}
-               <li>
-                  <a href="updater.php" target="_blank" class="bg-primary" title="Hay actualizaciones disponibles">
-                     <span class="glyphicon glyphicon-upload hidden-xs"></span>
-                     <span class="visible-xs">Actualizaciones</span>
-                  </a>
-               </li>
-               {/if}
+
                
                {if="$fsc->get_last_changes()"}
                <li class="dropdown">
@@ -122,22 +115,7 @@
                   </ul>
                </li>
                {/if}
-               
-               <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" title="Ayuda">
-                     <span class="glyphicon glyphicon-question-sign hidden-xs"></span>
-                     <span class="visible-xs">Ayuda</span>
-                  </a>
-                  <ul class="dropdown-menu">
-                     <li><a href="{#FS_COMMUNITY_URL#}/index.php?page=community_questions" target="_blank">Preguntas</a></li>
-                     <li><a href="{#FS_COMMUNITY_URL#}/index.php?page=community_errors" target="_blank">Errores</a></li>
-                     <li><a href="{#FS_COMMUNITY_URL#}/index.php?page=community_ideas" target="_blank">Sugerencias</a></li>
-                     <li><a href="{#FS_COMMUNITY_URL#}/index.php?page=community_colabora" target="_blank">Colabora</a></li>
-                     <li class="divider"></li>
-                     <li><a href="#" id="b_feedback"><span class="glyphicon glyphicon-send"></span> &nbsp; Informar...</a></li>
-                  </ul>
-               </li>
-               
+
                <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" title="{$fsc->user->nick}">
                      <span class="glyphicon glyphicon-user hidden-xs"></span>
@@ -156,6 +134,15 @@
                         </a>
                      </li>
                   </ul>
+
+               </li>
+               <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" title="{$fsc->user->nick}">
+                     <span class="glyphicon glyphicon-user hidden-xs"></span>
+                     <span class="visible-xs">Usuario</span>
+                  </a>
+
+
                </li>
             </ul>
          </div>
@@ -165,7 +152,7 @@
    {if="$fsc->user->css=='view/css/bootstrap-yeti.min.css'"}
    <div style="margin-bottom: 55px"></div>
    {else}
-   <div style="margin-bottom: 65px"></div>
+   <div style="margin-bottom: 70px"></div>
    {/if}
    
    {if="$fsc->get_errors()"}
@@ -183,9 +170,7 @@
       <ul>{loop="$fsc->get_advices()"}<li>{$value}</li>{/loop}</ul>
    </div>
    {/if}
-   
-   {include="feedback"}
-   
+
    <div class="modal fade" id="modal_iframe" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
          <div class="modal-content">

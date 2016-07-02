@@ -1,56 +1,13 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/**
- * Forma de pago de una factura.
- */
 class forma_pago extends fs_model
 {
-   /**
-    * Clave primaria. Varchar (10).
-    * @var type 
-    */
+  
    public $codpago;
    public $descripcion;
-   
-   /**
-    * Pagados -> marca las facturas generadas como pagadas.
-    * @var type 
-    */
    public $genrecibos;
-   
-   /**
-    * Código de la cuenta bancaria asociada.
-    * @var type 
-    */
    public $codcuenta;
-   
-   /**
-    * Para indicar si hay que mostrar la cuenta bancaria del cliente.
-    * @var type 
-    */
    public $domiciliado;
-   
-   /**
-    * Sirve para generar la fecha de vencimiento de las facturas.
-    * @var type 
-    */
    public $vencimiento;
    
    public function __construct($f=FALSE)

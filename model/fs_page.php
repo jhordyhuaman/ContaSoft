@@ -1,56 +1,17 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/**
- * Elemento del menú de FacturaScripts.
- */
 class fs_page extends fs_model
 {
-   /**
-    * Clave primaria. Varchar (30).
-    * Nombre de la página (controlador).
-    * @var type 
-    */
+   
    public $name;
    public $title;
-   
-   /**
-    * Nombre del menú donde queremos colocar el acceso.
-    * @var type 
-    */
    public $folder;
    public $version;
-   
-   /**
-    * FALSE -> ocultar en el menú.
-    * @var type 
-    */
    public $show_on_menu;
    
    public $exists;
    public $enabled;
    public $extra_url;
-   
-   /**
-    * Cuando un usuario no tiene asignada una página por defecto, se selecciona
-    * la primera página importante a la que tiene acceso.
-    */
    public $important;
    
    public function __construct($p=FALSE)

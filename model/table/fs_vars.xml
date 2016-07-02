@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Document   : fs_vars.xml
-    Description:
-        Estructura de la tabla fs_vars.
--->
 <tabla>
    <columna>
       <nombre>name</nombre>

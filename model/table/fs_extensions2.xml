@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Document   : fs_extensions2.xml
-    Description:
-        Estructura de la tabla fs_extensions2.
--->
 <tabla>
    <columna>
       <nombre>name</nombre>

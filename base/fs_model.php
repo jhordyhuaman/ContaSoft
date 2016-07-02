@@ -1,32 +1,10 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 require_once 'base/bround.php';
 require_once 'base/fs_cache.php';
 require_once 'base/fs_db2.php';
 require_once 'base/fs_default_items.php';
 
-/**
- * Esta función sirve para cargar modelos, y sobre todo, para cargarlos
- * desde la carpeta plugins, así se puede personalizar aún más el comportamiento
- * de FacturaScripts.
- */
 function require_model($name)
 {
    if( !isset($GLOBALS['models']) )
@@ -36,86 +14,73 @@ function require_model($name)
    
    if( !in_array($name, $GLOBALS['models']) )
    {
-      /// primero buscamos en los plugins
+      /// primero buscamos en los modulos
       $found = FALSE;
-      foreach($GLOBALS['plugins'] as $plugin)
+      foreach($GLOBALS['modulos'] as $plugin)
       {
-         if( file_exists('plugins/'.$plugin.'/model/'.$name) )
+         if( file_exists('modulos/'.$plugin.'/model/'.$name) )
          {
-            require_once 'plugins/'.$plugin.'/model/'.$name;
+            require_once 'modulos/'.$plugin.'/model/'.$name;
             $GLOBALS['models'][] = $name;
             $found = TRUE;
             break;
          }
       }
       
-      if( !$found AND file_exists('model/'.$name) )
+      if( !$found )
       {
-         require_once 'model/'.$name;
-         $GLOBALS['models'][] = $name;
+         if( file_exists('model/'.$name) )
+         {
+            require_once 'model/'.$name;
+            $GLOBALS['models'][] = $name;
+         }
       }
    }
 }
 
-/**
- * La clase de la que heredan todos los modelos, conecta a la base de datos,
- * comprueba la estructura de la tabla y de ser necesario la crea o adapta.
- */
+function get_class_name($object = NULL)
+{
+   $name = get_class($object);
+   
+   $pos = strrpos($name, '\\');
+   if($pos !== FALSE)
+   {
+      $name = substr($name, $pos + 1);
+   }
+   
+   return $name;
+}
+
+
 abstract class fs_model
 {
-   /**
-    * Proporciona acceso directo a la base de datos.
-    * Implementa la clase fs_mysql o fs_postgresql.
-    * @var fs_db2
-    */
+  
    protected $db;
    
-   /**
-    * Nombre de la tabla en la base de datos.
-    * @var type 
-    */
    protected $table_name;
-   
-   /**
-    * Directorio donde se encuentra el directorio table con
-    * el XML con la estructura de la tabla.
-    * @var type 
-    */
+ 
    protected $base_dir;
    
-   /**
-    * Permite conectar e interactuar con memcache.
-    * @var fs_cache
-    */
    protected $cache;
-   
-   /**
-    * Clase que se utiliza para definir algunos valores por defecto:
-    * codejercicio, codserie, coddivisa, etc...
-    * @var fs_default_items
-    */
+ 
    protected $default_items;
    
    private static $checked_tables;
    private static $errors;
-   
-   /**
-    * 
-    * @param type $name nombre de la tabla de la base de datos.
-    */
+ 
    public function __construct($name = '')
    {
       $this->cache = new fs_cache();
       $this->db = new fs_db2();
       $this->table_name = $name;
       
-      /// buscamos el xml de la tabla en los plugins
+      /// buscamos el xml de la tabla en los modulos
       $this->base_dir = '';
-      foreach($GLOBALS['plugins'] as $plugin)
+      foreach($GLOBALS['modulos'] as $plugin)
       {
-         if( file_exists('plugins/'.$plugin.'/model/table/'.$name.'.xml') )
+         if( file_exists('modulos/'.$plugin.'/model/table/'.$name.'.xml') )
          {
-            $this->base_dir = 'plugins/'.$plugin.'/';
+            $this->base_dir = 'modulos/'.$plugin.'/';
             break;
          }
       }
@@ -123,14 +88,16 @@ abstract class fs_model
       $this->default_items = new fs_default_items();
       
       if( !self::$errors )
+      {
          self::$errors = array();
+      }
       
       if( !self::$checked_tables )
       {
          self::$checked_tables = $this->cache->get_array('fs_checked_tables');
          if(self::$checked_tables)
          {
-            /// nos aseguramos de que existan todas las tablas que se suponen comprobadas
+            /// nos aseguramos de que existan todas las tablas 
             $tables = $this->db->list_tables();
             foreach(self::$checked_tables as $ct)
             {
@@ -155,17 +122,13 @@ abstract class fs_model
          }
       }
    }
-   
+ 
    protected function clean_checked_tables()
    {
       self::$checked_tables = array();
       $this->cache->delete('fs_checked_tables');
    }
-   
-   /**
-    * Muestra al usuario un mensaje de error
-    * @param type $msg mensaje de error
-    */
+  
    protected function new_error_msg($msg = FALSE)
    {
       if($msg)
@@ -174,59 +137,30 @@ abstract class fs_model
       }
    }
    
-   /**
-    * Devuelve la lista de mensajes de error.
-    * @return type lista de errores.
-    */
    public function get_errors()
    {
       return self::$errors;
    }
-   
+
    public function clean_errors()
    {
       self::$errors = array();
    }
-   
-   /**
-    * Esta función es llamada al crear una tabla.
-    * Permite insertar valores en la tabla.
-    */
+
    abstract protected function install();
    
-   /**
-    * Esta función devuelve TRUE si los datos del objeto se encuentran
-    * en la base de datos.
-    */
+
    abstract public function exists();
-   
-   /**
-    * Esta función sirve tanto para insertar como para actualizar
-    * los datos del objeto en la base de datos.
-    */
+  
    abstract public function save();
-   
-   /**
-    * Esta función sirve para eliminar los datos del objeto de la base de datos
-    */
+  
    abstract public function delete();
-   
-   /**
-    * Escapa las comillas de una cadena de texto.
-    * @param type $s cadena de texto a escapar
-    * @return type cadena de texto resultante
-    */
+ 
    protected function escape_string($s = '')
    {
       return $this->db->escape_string($s);
    }
-   
-   /**
-    * Transforma una variable en una cadena de texto válida para ser
-    * utilizada en una consulta SQL.
-    * @param type $v
-    * @return string
-    */
+
    public function var2str($v)
    {
       if( is_null($v) )
@@ -253,7 +187,7 @@ abstract class fs_model
       else
          return "'" . $this->db->escape_string($v) . "'";
    }
-   
+
    protected function bin2str($v)
    {
       if( is_null($v) )
@@ -263,7 +197,7 @@ abstract class fs_model
       else
          return "'".base64_encode($v)."'";
    }
-   
+
    protected function str2bin($v)
    {
       if( is_null($v) )
@@ -274,18 +208,12 @@ abstract class fs_model
          return base64_decode($v);
    }
    
-   /**
-    * PostgreSQL guarda los valores TRUE como 't', MySQL como 1.
-    * Esta función devuelve TRUE si el valor se corresponde con
-    * alguno de los anteriores.
-    * @param type $v
-    * @return type
-    */
+
    public function str2bool($v)
    {
       return ($v == 't' OR $v == '1');
    }
-   
+
    public function intval($s)
    {
       if( is_null($s) )
@@ -295,11 +223,7 @@ abstract class fs_model
       else
          return intval($s);
    }
-   
-   /**
-    * Compara dos números en coma flotante con una precisión de $precision,
-    * devuelve TRUE si son iguales, FALSE en caso contrario.
-    */
+
    public function floatcmp($f1, $f2, $precision = 10, $round = FALSE)
    {
       if( $round OR !function_exists('bccomp') )
@@ -325,16 +249,7 @@ abstract class fs_model
       return $dates;
    }
    
-   /**
-    * Esta función convierte:
-    * < en &lt;
-    * > en &gt;
-    * " en &quot;
-    * ' en &#39;
-    * 
-    * No tengas la tentación de sustiturla por htmlentities o htmlspecialshars
-    * porque te encontrarás con muchas sorpresas desagradables.
-    */
+ 
    public function no_html($t)
    {
       $newt = str_replace(
@@ -350,12 +265,7 @@ abstract class fs_model
    {
       return mb_substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
    }
-   
-   /**
-    * Comprueba y actualiza la estructura de la tabla si es necesario
-    * @param type $table_name
-    * @return boolean
-    */
+  
    protected function check_table($table_name)
    {
       $done = TRUE;
@@ -415,14 +325,7 @@ abstract class fs_model
       
       return $done;
    }
-   
-   /**
-    * Obtiene las columnas y restricciones del fichero xml para una tabla
-    * @param type $table_name
-    * @param type $columnas
-    * @param type $restricciones
-    * @return boolean
-    */
+ 
    protected function get_xml_table($table_name, &$columnas, &$restricciones)
    {
       $retorno = FALSE;

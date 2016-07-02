@@ -1,94 +1,24 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/**
- * Esta clase almacena los principales datos de la empresa.
- */
+
 class empresa extends fs_model
 {
-   /**
-    * Clave primaria.
-    * @var type 
-    */
+  
    public $id;
    public $xid;
-   
    public $stockpedidos;
-   
-   /**
-    * TRUE -> activa la contabilidad integrada. Se genera el asiento correspondiente
-    * cada vez que se crea/modifica una factura.
-    * @var type 
-    */
    public $contintegrada;
-   
-   /**
-    * TRUE -> activa el uso de recargo de equivalencia en los albaranes y facturas de compra.
-    * @var type 
-    */
    public $recequivalencia;
-   
-   /**
-    * Código de la serie por defecto.
-    * @var type 
-    */
    public $codserie;
-   
-   /**
-    * Código del almacén predeterminado.
-    * @var type 
-    */
    public $codalmacen;
-   
-   /**
-    * Código de la forma de pago predeterminada.
-    * @var type 
-    */
    public $codpago;
-   
-   /**
-    * Código de la divisa predeterminada.
-    * @var type 
-    */
    public $coddivisa;
-   
-   /**
-    * Código del ejercicio predeterminado.
-    * @var type 
-    */
    public $codejercicio;
    
    public $web;
    public $email;
-   
-   /**
-    * @deprecated since version 2015.053
-    * @var type 
-    */
    public $email_firma;
-   
-   /**
-    * @deprecated since version 2015.053
-    * @var type 
-    */
    public $email_password;
-   
    public $fax;
    public $telefono;
    public $codpais;
@@ -97,51 +27,16 @@ class empresa extends fs_model
    public $ciudad;
    public $codpostal;
    public $direccion;
-   
-   /**
-    * Nombre del administrador de la empresa.
-    * @var type 
-    */
    public $administrador;
-   
-   /**
-    * Actualmente sin uso.
-    * @var type 
-    */
    public $codedi;
-   
    public $cifnif;
-   
    public $nombre;
-   
-   /**
-    *
-    * @var type Nombre a mostrar en el menú de facturaScripts.
-    */
    public $nombrecorto;
-   
    public $lema;
-   
    public $horario;
-   
-   /**
-    * Texto al pié de las facturas de venta.
-    * @var type 
-    */
    public $pie_factura;
-   
-   /**
-    * Fecha de inicio de la actividad.
-    * @var type 
-    */
    public $inicio_actividad;
-   
-   /**
-    * Régimen de IVA de la empresa.
-    * @var type 
-    */
    public $regimeniva;
-   
    public $email_config;
    
    public function __construct()
@@ -229,7 +124,7 @@ class empresa extends fs_model
       return "INSERT INTO ".$this->table_name." (stockpedidos,contintegrada,recequivalencia,codserie,"
               ."codalmacen,codpago,coddivisa,codejercicio,web,email,fax,telefono,codpais,apartado,provincia,"
               ."ciudad,codpostal,direccion,administrador,codedi,cifnif,nombre,nombrecorto,lema,horario)"
-              ."VALUES (NULL,FALSE,NULL,'A','ALG','CONT','EUR','0001','https://www.facturascripts.com',"
+              ."VALUES (NULL,FALSE,NULL,'A','ALG','CONT','PEN','0001','ejemplos',"
               ."NULL,NULL,NULL,'ESP',NULL,NULL,NULL,NULL,'C/ Falsa, 123','',NULL,'00000014Z','Empresa ".$e." S.L.',"
               ."'E-".$e."','','');";
    }

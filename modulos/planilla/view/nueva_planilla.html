@@ -1,0 +1,71 @@
+{include="header"}
+
+<script src="plugins/kardex/view/js/bootstrap-select.min.js" type="text/javascript"></script>
+<script src="plugins/kardex/view/js/locale/grid.locale-es.js" type="text/javascript"></script>
+<script src="plugins/kardex/view/js/plugins/jquery.jqGrid.min.js" type="text/javascript"></script>
+
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="btn-group">
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
+               <span class="glyphicon glyphicon-refresh"></span>
+            </a>
+         </div>
+         <div class="btn-group">
+             {if="!$fsc->kardex_procesandose"}
+            <a href="#" class="btn btn-default btn-sm" id="b_kardex" name="kardex">
+               <span class='glyphicon glyphicon-equalizer'></span>
+               <span class="hidden-xs">&nbsp; Calcular Inventario Diario</span>
+            </a>
+            {/if}
+            {if="!$fsc->kardex_procesandose"}
+            <a href="#" class="btn btn-default btn-sm" id="b_opciones_kardex" name="opciones_kardex">
+               <span class='glyphicon glyphicon-cog'></span>
+               <span class="hidden-xs">&nbsp; Opciones de Calculo</span>
+            </a>
+            {/if}
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="page-header">
+            <h1>
+               <span class='glyphicon glyphicon-equalizer'></span>
+               Kardex
+               {if="$fsc->kardex_ultimo_proceso"}
+               <small>
+                  Última fecha procesada: {$fsc->kardex_ultimo_proceso}
+               </small>
+               {/if}
+            </h1>
+         </div>
+         <p class='help-block'>
+            Por favor seleccione el rango de fechas, el almacen involucrado y
+            proceda a hacer clic en el boton <b>Generar</b>.
+         </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         {if="$fsc->kardex_procesandose"}
+         <div class="alert alert-warning">
+            Usuario <b>{$fsc->kardex_usuario_procesando}</b> procesando Kardex,
+            por favor actualice la página hasta que el usuario termine su proceso.
+         </div>
+         {/if}
+         {if="$fsc->kardex_ultimo_proceso==''"}
+         <div class="alert alert-warning">
+            No se ha ejecutado el Calculo de Inventario Diario nunca, por favor ejecutelo
+            ahora o programelo para que pueda tener información correcta de los art&iacute;culos
+         </div>
+         {/if}
+      </div>
+   </div>
+
+</div>
+
+
+
+{include="footer"}

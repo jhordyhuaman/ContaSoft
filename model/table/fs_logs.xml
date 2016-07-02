@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Document   : fs_logs.xml
-    Description:
-        Estructura de la tabla fs_logs.
--->
 <tabla>
    <columna>
       <nombre>id</nombre>

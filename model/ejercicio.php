@@ -1,74 +1,20 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+
 
 require_model('asiento.php');
 
-/**
- * Ejercicio contable. Es el periodo en el que se agrupan asientos, facturas, albaranes...
- */
 class ejercicio extends fs_model
 {
-   /**
-    * Clave primaria. Varchar(4).
-    * @var type 
-    */
+   
    public $codejercicio;
    public $nombre;
    public $fechainicio;
    public $fechafin;
-   
-   /**
-    * Estado del ejercicio: ABIERTO|CERRADO
-    * @var type 
-    */
    public $estado;
-   
-   /**
-    * ID del asiento de cierre del ejercicio.
-    * @var type 
-    */
    public $idasientocierre;
-   
-   /**
-    * ID del asiento de pérdidas y ganancias.
-    * @var type 
-    */
    public $idasientopyg;
-   
-   /**
-    * ID del asiento de apertura.
-    * @var type 
-    */
    public $idasientoapertura;
-   
-   /**
-    * Identifica el plan contable utilizado. Esto solamente es necesario
-    * para dar compatibilidad con Eneboo. En FacturaScripts no se utiliza.
-    * @var type 
-    */
    public $plancontable;
-   
-   /**
-    * Longitud de caracteres de las subcuentas asignadas. Esto solamente es necesario
-    * para dar compatibilidad con Eneboo. En FacturaScripts no se utiliza.
-    * @var type 
-    */
    public $longsubcuenta;
    
    public function __construct($e = FALSE)
@@ -199,10 +145,6 @@ class ejercicio extends fs_model
          return FALSE;
    }
    
-   /**
-    * Devuelve el ejercicio para la fecha indicada.
-    * Si no existe, lo crea.
-    */
    public function get_by_fecha($fecha, $solo_abierto = TRUE, $crear = TRUE)
    {
       $sql = "SELECT * FROM ".$this->table_name." WHERE fechainicio <= "

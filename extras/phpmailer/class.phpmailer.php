@@ -175,7 +175,7 @@ class PHPMailer
     public $UseSendmailOptions = true;
 
     /**
-     * Path to PHPMailer plugins.
+     * Path to PHPMailer modulos.
      * Useful if the SMTP class is not in the PHP include path.
      * @type string
      * @deprecated Should not be needed now there is an autoloader.

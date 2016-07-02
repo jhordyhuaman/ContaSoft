@@ -1,21 +1,4 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 class admin_user extends fs_controller
 {
@@ -94,13 +77,12 @@ class admin_user extends fs_controller
             $this->modificar_user();
          }
          
-         /// ¿Estamos modificando nuestro usuario?
+       
          if($this->suser->nick == $this->user->nick)
          {
             $this->user = $this->suser;
          }
          
-         /// si el usuario no tiene acceso a ninguna página, entonces hay que informar del problema.
          if( !$this->suser->admin )
          {
             $sin_paginas = TRUE;
@@ -317,20 +299,11 @@ class admin_user extends fs_controller
             }
          }
          
-         /*
-          * Propiedad admin: solamente un admin puede cambiarla.
-          */
+         
          if($this->user->admin)
          {
-            /*
-             * El propio usuario no puede decidir dejar de ser administrador.
-             */
             if($this->user->nick != $this->suser->nick)
             {
-               /*
-                * Si un usuario es administrador y deja de serlo, hay que darle acceso
-                * a algunas páginas, en caso contrario no podrá continuar
-                */
                if($this->suser->admin AND !isset($_POST['sadmin']))
                {
                   $user_no_more_admin = TRUE;
@@ -365,11 +338,7 @@ class admin_user extends fs_controller
                /// para cada página, comprobamos si hay que darle acceso o no
                foreach($this->all_pages() as $p)
                {
-                  /**
-                   * Creamos un objeto fs_access con los datos del usuario y la página.
-                   * Si tiene acceso guardamos, sino eliminamos. Así no tenemos que comprobar uno a uno
-                   * si ya estaba en la base de datos. Eso lo hace el modelo.
-                   */
+                  
                   $a = new fs_access( array('fs_user'=> $this->suser->nick, 'fs_page'=>$p->name, 'allow_delete'=>FALSE) );
                   if( isset($_POST['allow_delete']) )
                   {
@@ -378,23 +347,15 @@ class admin_user extends fs_controller
                   
                   if($user_no_more_admin)
                   {
-                     /*
-                      * Si un usuario es administrador y deja de serlo, hay que darle acceso
-                      * a algunas páginas, en caso contrario no podrá continuar.
-                      */
+                     
                      $a->save();
                   }
                   else if( !isset($_POST['enabled']) )
                   {
-                     /**
-                      * No se ha marcado ningún checkbox de autorizado, así que eliminamos el acceso
-                      * a todas las páginas. Una a una.
-                      */
                      $a->delete();
                   }
                   else if( in_array($p->name, $_POST['enabled']) )
                   {
-                     /// la página ha sido marcada como autorizada.
                      $a->save();
                      
                      if( is_null($this->suser->fs_page) AND $p->show_on_menu )
@@ -405,7 +366,6 @@ class admin_user extends fs_controller
                   }
                   else
                   {
-                     /// la página no está marcada como autorizada.
                      $a->delete();
                   }
                }

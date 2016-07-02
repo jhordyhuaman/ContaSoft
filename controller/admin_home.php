@@ -1,27 +1,10 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2015-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/**
- * Panel de control de FacturaScripts.
- */
 class admin_home extends fs_controller
 {
+   public $disable_mod_plugins;
+   public $disable_add_plugins;
+   public $disable_rm_plugins;
    public $download_list;
    public $download_list2;
    public $last_download_check;
@@ -38,7 +21,29 @@ class admin_home extends fs_controller
    {
       $this->check_htaccess();
       
-      $this->get_download_list();
+      $this->disable_mod_plugins = FALSE;
+      $this->disable_add_plugins = FALSE;
+      $this->disable_rm_plugins = FALSE;
+      if( defined('FS_DISABLE_MOD_PLUGINS') )
+      {
+         $this->disable_mod_plugins = FS_DISABLE_MOD_PLUGINS;
+         $this->disable_add_plugins = FS_DISABLE_MOD_PLUGINS;
+         $this->disable_rm_plugins = FS_DISABLE_MOD_PLUGINS;
+      }
+      
+      if(!$this->disable_mod_plugins)
+      {
+         if( defined('FS_DISABLE_ADD_PLUGINS') )
+         {
+            $this->disable_add_plugins = FS_DISABLE_ADD_PLUGINS;
+         }
+         
+         if( defined('FS_DISABLE_RM_PLUGINS') )
+         {
+            $this->disable_rm_plugins = FS_DISABLE_RM_PLUGINS;
+         }
+      }
+
       $fsvar = new fs_var();
       
       if( isset($_GET['check4updates']) )
@@ -46,44 +51,23 @@ class admin_home extends fs_controller
          $this->template = FALSE;
          if( $this->check_for_updates2() )
          {
-            echo 'Hay actualizaciones disponibles.';
          }
          else
-            echo 'No hay actualizaciones.';
-      }
+            echo '';
+          }
       else if( isset($_GET['updated']) )
       {
-         /// el sistema ya se ha actualizado
          $fsvar->simple_delete('updates');
       }
-      else if(FS_DEMO)
-      {
-         $this->new_advice('En el modo demo no se pueden hacer cambios en esta página.');
-         $this->new_advice('Si te gusta FacturaScripts y quieres saber más, consulta la '
-                 . '<a href="https://www.facturascripts.com/comm3/index.php?page=community_questions">sección preguntas</a>.');
-      }
+
       else if( !$this->user->admin )
       {
          $this->new_error_msg('Sólo un administrador puede hacer cambios en esta página.');
       }
-      else if( isset($_GET['skip']) )
-      {
-         if($this->step == '1')
-         {
-            $this->step = '2';
-            $fsvar->simple_save('install_step', $this->step);
-         }
-      }
+
       else if( isset($_POST['modpages']) )
       {
-         /// activar/desactivas páginas del menú
-         
-         if(!$this->step)
-         {
-            $this->step = '1';
-            $fsvar->simple_save('install_step', $this->step);
-         }
-         
+
          foreach($this->all_pages() as $p)
          {
             if( !$p->exists ) /// la página está en la base de datos pero ya no existe el controlador
@@ -110,91 +94,7 @@ class admin_home extends fs_controller
          
          $this->new_message('Datos guardados correctamente.');
       }
-      else if( isset($_GET['enable']) )
-      {
-         /// activar plugin
-         $this->enable_plugin($_GET['enable']);
-         
-         if($this->step == '1')
-         {
-            $this->step = '2';
-            $fsvar->simple_save('install_step', $this->step);
-         }
-      }
-      else if( isset($_GET['disable']) )
-      {
-         /// desactivar plugin
-         $this->disable_plugin($_GET['disable']);
-      }
-      else if( isset($_GET['delete_plugin']) )
-      {
-         /// eliminar plugin
-         if( is_writable('plugins/'.$_GET['delete_plugin']) )
-         {
-            if( $this->delTree('plugins/'.$_GET['delete_plugin']) )
-            {
-               $this->new_message('Plugin '.$_GET['delete_plugin'].' eliminado correctamente.');
-            }
-            else
-               $this->new_error_msg('Imposible eliminar el plugin '.$_GET['delete_plugin']);
-         }
-         else
-            $this->new_error_msg('No tienes permisos de escritura sobre la carpeta plugins/'.$_GET['delete_plugin']);
-      }
-      else if( isset($_POST['install']) )
-      {
-         $disabled = FALSE;
-         if( defined('FS_DISABLE_ADD_PLUGINS') )
-         {
-            $disabled = FS_DISABLE_ADD_PLUGINS;
-         }
-         
-         /// instalar plugin (copiarlo y descomprimirlo)
-         if($disabled)
-         {
-            $this->new_error_msg('La subida de plugins está desactivada.');
-         }
-         else if( is_uploaded_file($_FILES['fplugin']['tmp_name']) )
-         {
-            $zip = new ZipArchive();
-            $res = $zip->open($_FILES['fplugin']['tmp_name']);
-            if($res === TRUE)
-            {
-               $zip->extractTo('plugins/');
-               $zip->close();
-               $this->new_message('Plugin '.$_FILES['fplugin']['name'].' añadido correctamente. Ya puedes activarlo.');
-               
-               $this->cache->clean();
-            }
-            else
-               $this->new_error_msg('Error al abrir el archivo ZIP. Código: '.$res);
-         }
-         else
-         {
-            $this->new_error_msg('Archivo no encontrado. ¿Pesa más de '
-                    . $this->get_max_file_upload().' MB? Ese es el límite que tienes'
-                    . ' configurado en tu servidor.');
-         }
-      }
-      else if( isset($_GET['download']) )
-      {
-         /// descargamos un plugin de la lista fija
-         $this->download1();
-      }
-      else if( isset($_GET['download2']) )
-      {
-         /// descargamos un plugin de la lista de la comunidad
-         $this->download2();
-      }
-      else if( isset($_GET['reset']) )
-      {
-         /// reseteamos la configuración avanzada
-         if( file_exists('tmp/'.FS_TMP_NAME.'config2.ini') )
-         {
-            unlink('tmp/'.FS_TMP_NAME.'config2.ini');
-            $this->new_message('Configuración reiniciada correctamente, pulsa <a href="'.$this->url().'#avanzado">aquí</a> para continuar.');
-         }
-      }
+
       else
       {
          /// ¿Guardamos las opciones de la pestaña avanzado?
@@ -236,22 +136,17 @@ class admin_home extends fs_controller
       $this->paginas = $this->all_pages();
       $this->load_menu(TRUE);
    }
-   
-   /**
-    * Devuelve las páginas/controladore de los plugins activos.
-    * @return type
-    */
+
    private function all_pages()
    {
       $pages = array();
       $page_names = array();
-      
-      /// añadimos las páginas de los plugins
+
       foreach($this->plugins() as $plugin)
       {
-         if( file_exists(getcwd().'/plugins/'.$plugin.'/controller') )
+         if( file_exists(getcwd().'/modulos/'.$plugin.'/controller') )
          {
-            foreach( scandir(getcwd().'/plugins/'.$plugin.'/controller') as $f )
+            foreach( scandir(getcwd().'/modulos/'.$plugin.'/controller') as $f )
             {
                if( substr($f, -4) == '.php' )
                {
@@ -269,8 +164,7 @@ class admin_home extends fs_controller
             }
          }
       }
-      
-      /// añadimos las páginas que están en el directorio controller
+
       foreach( scandir(getcwd().'/controller') as $f)
       {
          if( substr($f, -4) == '.php' )
@@ -326,29 +220,21 @@ class admin_home extends fs_controller
       
       return $pages;
    }
-   
-   /**
-    * Devuelve la lista de plugins instalados y activados
-    * @return type
-    */
+
    private function plugins()
    {
-      return $GLOBALS['plugins'];
+      return $GLOBALS['modulos'];
    }
    
-   /**
-    * Activa una página/controlador.
-    * @param type $page
-    */
+
    private function enable_page($page)
    {
-      /// primero buscamos en los plugins
       $found = FALSE;
       foreach($this->plugins() as $plugin)
       {
-         if( file_exists('plugins/'.$plugin.'/controller/'.$page->name.'.php') )
+         if( file_exists('modulos/'.$plugin.'/controller/'.$page->name.'.php') )
          {
-            require_once 'plugins/'.$plugin.'/controller/'.$page->name.'.php';
+            require_once 'modulos/'.$plugin.'/controller/'.$page->name.'.php';
             $new_fsc = new $page->name();
             $found = TRUE;
             
@@ -375,16 +261,14 @@ class admin_home extends fs_controller
          $new_fsc = new $page->name(); /// cargamos el controlador asociado
          
          if( !$new_fsc->page->save() )
+         {
             $this->new_error_msg("Imposible guardar la página ".$page->name);
+         }
          
          unset($new_fsc);
       }
    }
-   
-   /**
-    * Desactiva una página/controlador.
-    * @param type $page
-    */
+
    private function disable_page($page)
    {
       if($page->name == $this->page->name)
@@ -396,11 +280,7 @@ class admin_home extends fs_controller
          $this->new_error_msg('Imposible eliminar la página '.$page->name.'.');
       }
    }
-   
-   /**
-    * Devuelve la lista de elementos a traducir
-    * @return type
-    */
+
    public function traducciones()
    {
       $clist = array();
@@ -421,12 +301,7 @@ class admin_home extends fs_controller
       return $clist;
    }
 
-   /**
-    * Timezones list with GMT offset
-    * 
-    * @return array
-    * @link http://stackoverflow.com/a/9328760
-    */
+
    public function get_timezone_list()
    {
       $zones_array = array();
@@ -440,20 +315,12 @@ class admin_home extends fs_controller
       
       return $zones_array;
    }
-   
-   /**
-    * Lista de opciones para NF0
-    * @return type
-    */
+
    public function nf0()
    {
       return array(0, 1, 2, 3, 4, 5);
    }
-   
-   /**
-    * Lista de opciones para NF1
-    * @return type
-    */
+
    public function nf1()
    {
       return array(
@@ -462,18 +329,23 @@ class admin_home extends fs_controller
           ' ' => '(espacio en blanco)'
       );
    }
-   
-   /**
-    * Devuelve la lista completada de plugins instalados
-    * @return type
-    */
+
    public function plugin_advanced_list()
    {
       $plugins = array();
+      $disabled = array();
       
-      foreach( scandir(getcwd().'/plugins') as $f)
+      if( defined('FS_DISABLED_PLUGINS') )
       {
-         if( is_dir('plugins/'.$f) AND $f != '.' AND $f != '..')
+         foreach( explode(',', FS_DISABLED_PLUGINS) as $aux )
+         {
+            $disabled[] = $aux;
+         }
+      }
+      
+      foreach( scandir(getcwd().'/modulos') as $f)
+      {
+         if( is_dir('modulos/'.$f) AND $f != '.' AND $f != '..' AND !in_array($f, $disabled) )
          {
             $plugin = array(
                 'compatible' => FALSE,
@@ -489,93 +361,14 @@ class admin_home extends fs_controller
                 'version_url' => '',
                 'wizard' => FALSE,
             );
-            
-            if( file_exists('plugins/'.$f.'/facturascripts.ini') )
-            {
-               $plugin['compatible'] = TRUE;
-               $plugin['enabled'] = in_array($f, $this->plugins());
-               
-               if( file_exists('plugins/'.$f.'/description') )
-               {
-                  $plugin['description'] = file_get_contents('plugins/'.$f.'/description');
-               }
-               
-               $ini_file = parse_ini_file('plugins/'.$f.'/facturascripts.ini');
-               if( isset($ini_file['version']) )
-               {
-                  $plugin['version'] = intval($ini_file['version']);
-               }
-               
-               if( isset($ini_file['require']) )
-               {
-                  if($ini_file['require'] != '')
-                  {
-                     foreach(explode(',', $ini_file['require']) as $aux)
-                     {
-                        $plugin['require'][] = $aux;
-                     }
-                  }
-               }
-               
-               if( isset($ini_file['idplugin']) )
-               {
-                  $plugin['idplugin'] = $ini_file['idplugin'];
-               }
-               
-               if( isset($ini_file['update_url']) )
-               {
-                  $plugin['update_url'] = $ini_file['update_url'];
-               }
-               
-               if( isset($ini_file['version_url']) )
-               {
-                  $plugin['version_url'] = $ini_file['version_url'];
-               }
-               else if($this->download_list2)
-               {
-                  foreach($this->download_list2 as $ditem)
-                  {
-                     if($ditem->id == $plugin['idplugin'])
-                     {
-                        if( intval($ditem->version) > $plugin['version'] )
-                        {
-                           $plugin['download2_url'] = 'updater.php?idplugin='.$plugin['idplugin'].'&name='.$f;
-                        }
-                        break;
-                     }
-                  }
-               }
-               
-               if( isset($ini_file['wizard']) )
-               {
-                  $plugin['wizard'] = $ini_file['wizard'];
-               }
-               
-               if($plugin['enabled'])
-               {
-                  foreach( array_reverse($this->plugins()) as $i => $value)
-                  {
-                     if($value == $f)
-                     {
-                        $plugin['prioridad'] = $i;
-                        break;
-                     }
-                  }
-               }
-            }
-            
+
             $plugins[] = $plugin;
          }
       }
       
       return $plugins;
    }
-   
-   /**
-    * Elimina recursivamente un directorio
-    * @param type $dir
-    * @return type
-    */
+
    private function delTree($dir)
    {
       $files = array_diff(scandir($dir), array('.','..'));
@@ -585,18 +378,14 @@ class admin_home extends fs_controller
       }
       return rmdir($dir);
    }
-   
-   /**
-    * Activa un plugin
-    * @param type $name
-    */
+
    private function enable_plugin($name)
    {
       if( substr($name, -7) == '-master' )
       {
          /// renombramos el directorio
          $name = substr($name, 0, -7);
-         rename('plugins/'.$name.'-master', 'plugins/'.$name);
+         rename('modulos/'.$name.'-master', 'modulos/'.$name);
       }
       
       /// comprobamos las dependencias
@@ -610,21 +399,32 @@ class admin_home extends fs_controller
             
             foreach($pitem['require'] as $req)
             {
-               if( !in_array($req, $GLOBALS['plugins']) )
+               if( !in_array($req, $GLOBALS['modulos']) )
                {
                   $install = FALSE;
-                  $this->new_error_msg('Dependencias incumplidas: <b>'.$req.'</b>');
+                  $txt = 'Dependencias incumplidas: <b>'.$req.'</b>';
+                  
+                  foreach($this->download_list2 as $value)
+                  {
+                     if($value->nombre == $req)
+                     {
+                        $txt .= '. Puedes descargar este plugin desde la <b>pestaña descargas</b>.';
+                        break;
+                     }
+                  }
+                  
+                  $this->new_error_msg($txt);
                }
             }
             break;
          }
       }
       
-      if( $install AND !in_array($name, $GLOBALS['plugins']) )
+      if( $install AND !in_array($name, $GLOBALS['modulos']) )
       {
-         array_unshift($GLOBALS['plugins'], $name);
+         array_unshift($GLOBALS['modulos'], $name);
          
-         if( file_put_contents('tmp/enabled_plugins.list', join(',', $GLOBALS['plugins']) ) !== FALSE )
+         if( file_put_contents('tmp/'.FS_TMP_NAME.'enabled_plugins.list', join(',', $GLOBALS['modulos']) ) !== FALSE )
          {
             if($wizard)
             {
@@ -634,16 +434,16 @@ class admin_home extends fs_controller
             else
             {
                /// cargamos el archivo functions.php
-               if( file_exists('plugins/'.$name.'/functions.php') )
+               if( file_exists('modulos/'.$name.'/functions.php') )
                {
-                  require_once 'plugins/'.$name.'/functions.php';
+                  require_once 'modulos/'.$name.'/functions.php';
                }
                
-               if( file_exists(getcwd().'/plugins/'.$name.'/controller') )
+               if( file_exists(getcwd().'/modulos/'.$name.'/controller') )
                {
                   /// activamos las páginas del plugin
                   $page_list = array();
-                  foreach( scandir(getcwd().'/plugins/'.$name.'/controller') as $f)
+                  foreach( scandir(getcwd().'/modulos/'.$name.'/controller') as $f)
                   {
                      if( is_string($f) AND strlen($f) > 0 AND !is_dir($f) )
                      {
@@ -652,7 +452,7 @@ class admin_home extends fs_controller
                            $page_name = substr($f, 0, -4);
                            $page_list[] = $page_name;
                            
-                           require_once 'plugins/'.$name.'/controller/'.$f;
+                           require_once 'modulos/'.$name.'/controller/'.$f;
                            $new_fsc = new $page_name();
                            
                            if( !$new_fsc->page->save() )
@@ -679,36 +479,32 @@ class admin_home extends fs_controller
             $this->new_error_msg('Imposible activar el plugin <b>'.$name.'</b>.');
       }
    }
-   
-   /**
-    * Desactiva un plugin
-    * @param type $name
-    */
+
    private function disable_plugin($name)
    {
-      if( file_exists('tmp/enabled_plugins.list') )
+      if( file_exists('tmp/'.FS_TMP_NAME.'enabled_plugins.list') )
       {
          if( in_array($name, $this->plugins()) )
          {
-            if( count($GLOBALS['plugins']) == 1 AND $GLOBALS['plugins'][0] == $name )
+            if( count($GLOBALS['modulos']) == 1 AND $GLOBALS['modulos'][0] == $name )
             {
-               $GLOBALS['plugins'] = array();
-               unlink('tmp/enabled_plugins.list');
+               $GLOBALS['modulos'] = array();
+               unlink('tmp/'.FS_TMP_NAME.'enabled_plugins.list');
                
                $this->new_message('Plugin <b>'.$name.'</b> desactivado correctamente.');
             }
             else
             {
-               foreach($GLOBALS['plugins'] as $i => $value)
+               foreach($GLOBALS['modulos'] as $i => $value)
                {
                   if($value == $name)
                   {
-                     unset($GLOBALS['plugins'][$i]);
+                     unset($GLOBALS['modulos'][$i]);
                      break;
                   }
                }
                
-               if( file_put_contents('tmp/enabled_plugins.list', join(',', $GLOBALS['plugins']) ) !== FALSE )
+               if( file_put_contents('tmp/'.FS_TMP_NAME.'enabled_plugins.list', join(',', $GLOBALS['modulos']) ) !== FALSE )
                {
                   $this->new_message('Plugin <b>'.$name.'</b> desactivado correctamente.');
                }
@@ -732,9 +528,9 @@ class admin_home extends fs_controller
             }
             else
             {
-               foreach($GLOBALS['plugins'] as $plugin)
+               foreach($GLOBALS['modulos'] as $plugin)
                {
-                  if( file_exists(getcwd().'/plugins/'.$plugin.'/controller/'.$p->name.'.php') AND $name != $plugin)
+                  if( file_exists(getcwd().'/modulos/'.$plugin.'/controller/'.$p->name.'.php') AND $name != $plugin)
                   {
                      $encontrada = TRUE;
                      break;
@@ -755,11 +551,11 @@ class admin_home extends fs_controller
             $this->new_message('Se han eliminado automáticamente las siguientes páginas: '.join(', ', $eliminadas));
          }
          
-         /// desactivamos los plugins que dependan de este
+         /// desactivamos los modulos que dependan de este
          foreach($this->plugin_advanced_list() as $plug)
          {
             /// ¿El plugin está activo?
-            if( in_array($plug['name'], $GLOBALS['plugins']) )
+            if( in_array($plug['name'], $GLOBALS['modulos']) )
             {
                /**
                 * Si el plugin que hemos desactivado, es requerido por el plugin
@@ -773,11 +569,11 @@ class admin_home extends fs_controller
          }
          
          /// borramos los archivos temporales del motor de plantillas
-         foreach( scandir(getcwd().'/tmp') as $f)
+         foreach( scandir(getcwd().'/tmp/'.FS_TMP_NAME) as $f)
          {
             if( substr($f, -4) == '.php' )
             {
-               unlink('tmp/'.$f);
+               unlink('tmp/'.FS_TMP_NAME.$f);
             }
          }
          
@@ -785,11 +581,7 @@ class admin_home extends fs_controller
          $this->cache->clean();
       }
    }
-   
-   /**
-    * Comprueba actualizaciones de los plugins y del núcleo.
-    * @return boolean
-    */
+
    public function check_for_updates2()
    {
       if( !$this->user->admin )
@@ -800,7 +592,7 @@ class admin_home extends fs_controller
       {
          $fsvar = new fs_var();
          
-         /// comprobamos actualizaciones en los plugins
+         /// comprobamos actualizaciones en los modulos
          $updates = FALSE;
          foreach($this->plugin_advanced_list() as $plugin)
          {
@@ -829,18 +621,7 @@ class admin_home extends fs_controller
                }
             }
          }
-         
-         if(!$updates)
-         {
-            /// comprobamos actualizaciones del núcleo
-            $version = file_get_contents('VERSION');
-            $internet_version = $this->curl_get_contents('https://raw.githubusercontent.com/NeoRazorX/facturascripts_2015/master/VERSION');
-            if( floatval($version) < floatval($internet_version) )
-            {
-               $updates = TRUE;
-            }
-         }
-         
+
          if($updates)
          {
             $fsvar->simple_save('updates', 'true');
@@ -854,13 +635,7 @@ class admin_home extends fs_controller
          }
       }
    }
-   
-   /**
-    * Descarga el contenido con curl o file_get_contents
-    * @param type $url
-    * @param type $timeout
-    * @return type
-    */
+
    private function curl_get_contents($url)
    {
       if( function_exists('curl_init') )
@@ -888,14 +663,7 @@ class admin_home extends fs_controller
       else
          return file_get_contents($url);
    }
-   
-   /**
-    * Función alternativa para cuando el followlocation falla.
-    * @param type $ch
-    * @param type $redirects
-    * @param type $curlopt_header
-    * @return type
-    */
+
    private function curl_redirect_exec($ch, &$redirects, $curlopt_header = false)
    {
       curl_setopt($ch, CURLOPT_HEADER, true);
@@ -929,239 +697,6 @@ class admin_home extends fs_controller
          curl_close($ch);
          return $body;
       }
-   }
-   
-   /**
-    * Descarga un plugin de la lista de plugins fijos.
-    */
-   private function download1()
-   {
-      if( isset($this->download_list[$_GET['download']]) )
-      {
-         $this->new_message('Descargando el plugin '.$_GET['download']);
-         
-         if( @file_put_contents('download.zip', $this->curl_get_contents($this->download_list[$_GET['download']]['url']) ) )
-         {
-            $zip = new ZipArchive();
-            $res = $zip->open('download.zip');
-            if($res === TRUE)
-            {
-               $plugins_list = scandir(getcwd().'/plugins');
-               $zip->extractTo('plugins/');
-               $zip->close();
-               unlink('download.zip');
-               
-               /// renombramos si es necesario
-               foreach( scandir(getcwd().'/plugins') as $f)
-               {
-                  if( is_dir('plugins/'.$f) AND $f != '.' AND $f != '..')
-                  {
-                     $encontrado2 = FALSE;
-                     foreach($plugins_list as $f2)
-                     {
-                        if($f == $f2)
-                        {
-                           $encontrado2 = TRUE;
-                           break;
-                        }
-                     }
-                     
-                     if(!$encontrado2)
-                     {
-                        rename('plugins/'.$f, 'plugins/'.$_GET['download']);
-                        break;
-                     }
-                  }
-               }
-               
-               $this->new_message('Plugin añadido correctamente.');
-               $this->enable_plugin($_GET['download']);
-               
-               if($this->step == '1')
-               {
-                  $this->step = '2';
-                  $fsvar = new fs_var();
-                  $fsvar->simple_save('install_step', $this->step);
-               }
-            }
-            else
-               $this->new_error_msg('Error al abrir el ZIP. Código: '.$res);
-         }
-         else
-         {
-            $this->new_error_msg('Error al descargar. Tendrás que descargarlo manualmente desde '
-                    . '<a href="'.$this->download_list[$_GET['download']]['url'].'" target="_blank">aquí</a> '
-                    . 'y añadirlo desde la pestaña <b>plugins</b>.');
-         }
-      }
-      else
-         $this->new_error_msg('Descarga no encontrada.');
-   }
-   
-   /**
-    * Descarga un plugin de la lista dinámica de la comunidad.
-    */
-   private function download2()
-   {
-      $encontrado = FALSE;
-      foreach($this->download_list2 as $item)
-      {
-         if( $item->id == intval($_GET['download2']) )
-         {
-            $this->new_message('Descargando el plugin '.$item->nombre);
-            $encontrado = TRUE;
-            
-            if( @file_put_contents('download.zip', $this->curl_get_contents($item->zip_link) ) )
-            {
-               $zip = new ZipArchive();
-               $res = $zip->open('download.zip');
-               if($res === TRUE)
-               {
-                  $plugins_list = scandir(getcwd().'/plugins');
-                  $zip->extractTo('plugins/');
-                  $zip->close();
-                  unlink('download.zip');
-                  
-                  /// renombramos si es necesario
-                  foreach( scandir(getcwd().'/plugins') as $f)
-                  {
-                     if( is_dir('plugins/'.$f) AND $f != '.' AND $f != '..')
-                     {
-                        $encontrado2 = FALSE;
-                        foreach($plugins_list as $f2)
-                        {
-                           if($f == $f2)
-                           {
-                              $encontrado2 = TRUE;
-                              break;
-                           }
-                        }
-                        
-                        if(!$encontrado2)
-                        {
-                           rename('plugins/'.$f, 'plugins/'.$item->nombre);
-                           break;
-                        }
-                     }
-                  }
-                  
-                  $this->new_message('Plugin añadido correctamente.');
-                  $this->enable_plugin($item->nombre);
-               }
-               else
-                  $this->new_error_msg('Error al abrir el ZIP. Código: '.$res);
-            }
-            else
-            {
-               $this->new_error_msg('Error al descargar. Tendrás que descargarlo manualmente desde '
-                       . '<a href="'.$item->zip_link.'" target="_blank">aquí</a> y añadirlo desde la pestaña <b>plugins</b>.');
-            }
-            break;
-         }
-      }
-      
-      if(!$encontrado)
-      {
-         $this->new_error_msg('Descarga no encontrada.');
-      }
-   }
-   
-   private function get_download_list()
-   {
-      /**
-       * Esta es la lista de plugins fijos, los imprescindibles.
-       */
-      $this->download_list = array(
-          'facturacion_base' => array(
-              'url' => 'https://github.com/NeoRazorX/facturacion_base/archive/master.zip',
-              'url_repo' => 'https://github.com/NeoRazorX/facturacion_base',
-              'description' => 'Permite la gestión básica de una empresa: gestión de ventas, de compras y contabilidad básica.'
-          ),
-          'argentina' => array(
-              'url' => 'https://github.com/FacturaScripts/argentina/archive/master.zip',
-              'url_repo' => 'https://github.com/FacturaScripts/argentina',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>Argentina</b>.'
-          ),
-          'chile' => array(
-              'url' => 'https://github.com/FacturaScripts/chile/archive/master.zip',
-              'url_repo' => 'https://github.com/FacturaScripts/chile',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>Chile</b>.'
-          ),
-          'colombia' => array(
-              'url' => 'https://github.com/FacturaScripts/colombia/archive/master.zip',
-              'url_repo' => 'https://github.com/FacturaScripts/colombia',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>Colombia</b>.'
-          ),
-          'ecuador' => array(
-              'url' => 'https://github.com/FacturaScripts/ecuador/archive/master.zip',
-              'url_repo' => 'https://github.com/FacturaScripts/ecuador',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>Ecuador</b>.'
-          ),
-          'panama' => array(
-              'url' => 'https://github.com/NeoRazorX/panama/archive/master.zip',
-              'url_repo' => 'https://github.com/NeoRazorX/panama',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>Panamá</b>.'
-          ),
-          'peru' => array(
-              'url' => 'https://github.com/NeoRazorX/peru/archive/master.zip',
-              'url_repo' => 'https://github.com/NeoRazorX/peru',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>Perú</b>.'
-          ),
-          'republica_dominicana' => array(
-              'url' => 'https://github.com/joenilson/republica_dominicana/archive/master.zip',
-              'url_repo' => 'https://github.com/joenilson/republica_dominicana',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>República Dominicana</b>.'
-          ),
-          'venezuela' => array(
-              'url' => 'https://github.com/ConsultoresTecnologicos/FS-LocalizacionVenezuela/archive/master.zip',
-              'url_repo' => 'https://github.com/ConsultoresTecnologicos/FS-LocalizacionVenezuela',
-              'description' => 'Plugin de adaptación de FacturaScripts a <b>Venezuela</b>.'
-          ),
-      );
-      $fsvar = new fs_var();
-      $this->step = $fsvar->simple_get('install_step');
-      
-      /**
-        * Usamos last_download_check para almacenar la última vez que vimos las descargas.
-        * Así podemos saber qué descargas son nuevas.
-        */
-      $this->last_download_check = $fsvar->simple_get('last_download_check');
-      if(!$this->last_download_check)
-      {
-         $this->last_download_check = Date('d-m-Y', strtotime('-1week'));
-      }
-      $this->new_downloads = 0;
-      
-      /**
-       * Download_list2 es la lista de plugins de la comunidad, se descarga de Internet.
-       */
-      $this->download_list2 = $this->cache->get('download_list');
-      if(!$this->download_list2)
-      {
-         $json = @$this->curl_get_contents('https://www.facturascripts.com/comm3/index.php?page=community_plugins&json=TRUE', 5);
-         if($json)
-         {
-            $this->download_list2 = json_decode($json);
-            $this->cache->set('download_list', $this->download_list2);
-         }
-         else
-         {
-            $this->new_error_msg('Error al descargar la lista de plugins.');
-            $this->download_list2 = array();
-         }
-      }
-      foreach($this->download_list2 as $i => $di)
-      {
-         $this->download_list2[$i]->nuevo = FALSE;
-         if( strtotime($di->creado) > strtotime($this->last_download_check) )
-         {
-            $this->new_downloads++;
-            $this->download_list2[$i]->nuevo = TRUE;
-         }
-      }
-      /// ahora nos guardamos last_download_check
-      $this->last_download_check = Date('d-m-Y', strtotime('-1week'));
-      $fsvar->simple_save('last_download_check', $this->last_download_check);
    }
    
    private function check_htaccess()

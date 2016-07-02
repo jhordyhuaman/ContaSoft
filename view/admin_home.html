@@ -1,125 +1,12 @@
 {include="header"}
 
-<script type="text/javascript">
-   function fs_marcar_todo()
-   {
-      $('#f_enable_pages input:checkbox').prop('checked', true);
-   }
-   function fs_marcar_nada()
-   {
-      $('#f_enable_pages input:checkbox').prop('checked', false);
-   }
-   function eliminar(name)
-   {
-      if( confirm("¿Realmente desea eliminar este plugin?") )
-      {
-         window.location.href = '{$fsc->url()}&delete_plugin='+name+'#plugins';
-      }
-   }
-   function descargar_plugin_inestable(id)
-   {
-      if( confirm("Este plugin está marcado como inestable ¿Estas seguro de que quieres descargarlo?") )
-      {
-         window.location.href = '{$fsc->url()}&caca={$fsc->random_string(4)}&download2='+id+'#plugins';
-      }
-   }
-   $(document).ready(function() {
-      
-      {if="$fsc->step=='1'"}
-      $('#tab_panel_control a[href="#t_descargas"]').tab('show');
-      {/if}
-      
-      if(window.location.hash.substring(1) == 'paginas')
-      {
-         $('#tab_panel_control a[href="#t_paginas"]').tab('show');
-      }
-      else if(window.location.hash.substring(1) == 'plugins')
-      {
-         $('#tab_panel_control a[href="#t_plugins"]').tab('show');
-      }
-      else if(window.location.hash.substring(1) == 'descargas')
-      {
-         $('#tab_panel_control a[href="#t_descargas"]').tab('show');
-      }
-      else if(window.location.hash.substring(1) == 'avanzado')
-      {
-         $('#tab_panel_control a[href="#t_avanzado"]').tab('show');
-      }
-   });
-</script>
-
-{if="!$fsc->step"}
-<div class="well">
-   <div class="page-header" style="margin-top: 0px;">
-      <h1>
-         Bienvenido a FacturaScripts
-         <small>{$fsc->version()}</small>
-      </h1>
-   </div>
-   <p class="help-block">
-      Ya tienes instalado el núcleo. Como ves, el núcleo permite gestionar páginas,
-      plugins y usuarios. Pulsa continuar para seguir con la instalación.
-   </p>
-   <a href="#" class="btn btn-sm btn-info" onclick="fs_marcar_todo();f_enable_pages.submit();">
-      <span class="glyphicon glyphicon-ok"></span>&nbsp; Continuar
-   </a>
-</div>
-{elseif="$fsc->step=='1'"}
-<div class="well">
-   <div class="page-header" style="margin-top: 0px;">
-      <h1>
-         <i class="fa fa-puzzle-piece"></i> Plugins
-      </h1>
-   </div>
-   <p class="help-block">
-      El núcleo solamente se encarga de la gestión de usuarios, plugins y páginas.
-      Para todo lo demás tienes los plugins.
-      En la pestaña <b>descargas</b> tienes disponibles los principales plugins.
-      Elige los que necesites. Hay de todo y la lista se actualiza periódicamente.
-      <br/>
-      Los plugins instalados los tienes en la pestaña <b>plugins</b>. Puedes añadir
-      plugins manualmente, si lo deseas, y también puedes activar o desactivar,
-      incluso eliminarlos.
-      <br/>
-      Además, toda la facturación y contabilidad básica ha sido movida al plugin
-      <b>facturacion_base</b>. Puedes descargarlo automáticamente e instalarlo pulsando
-      este botón.
-   </p>
-   <a href="{$fsc->url()}&caca={$fsc->random_string(4)}&download=facturacion_base#plugins" class="btn btn-sm btn-info">
-      <span class="glyphicon glyphicon-download-alt"></span>&nbsp; Descargar facturacion_base
-   </a>
-   <a href="{$fsc->url()}&caca={$fsc->random_string(4)}&skip=TRUE#descargas" class="btn btn-sm btn-warning">
-      <span class="glyphicon glyphicon-remove"></span>&nbsp; No, gracias
-   </a>
-</div>
-{else}
 <div class="container-fluid" style="margin-top: 10px;">
    <div class="row">
       <div class="col-xs-6">
          <div class="btn-group">
-            <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
+            <a class="btn btn-sm btn-default" href="" title="Recargar la página">
                <span class="glyphicon glyphicon-refresh"></span>
             </a>
-            {if="$fsc->page->is_default()"}
-            <a class="btn btn-sm btn-default active" href="{$fsc->url()}&amp;default_page=FALSE" title="desmarcar como página de inicio">
-               <span class="glyphicon glyphicon-home"></span>
-            </a>
-            {else}
-            <a class="btn btn-sm btn-default" href="{$fsc->url()}&amp;default_page=TRUE" title="marcar como página de inicio">
-               <span class="glyphicon glyphicon-home"></span>
-            </a>
-            {/if}
-         </div>
-         <div class="btn-group">
-            <a class="btn btn-sm {if="$fsc->check_for_updates()"}btn-info{else}btn-default{/if}" href="updater.php" title="Actualizador">
-               <span class="glyphicon glyphicon-upload"></span>
-               <span class="hidden-xs">&nbsp; Actualizador</span>
-            </a>
-            {loop="$fsc->extensions"}
-               {if="$value->type=='button'"}
-               <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
-               {/if}
-            {/loop}
          </div>
       </div>
       <div class="col-xs-6 text-right">
@@ -127,9 +14,8 @@
       </div>
    </div>
 </div>
-{/if}
 
-<div id="tab_panel_control" role="tabpanel">
+<div id="tab_panel_control" role="tabpanel" style="">
    <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" class="active">
          <a href="#t_paginas" aria-controls="t_paginas" role="tab" data-toggle="tab">
@@ -140,19 +26,10 @@
       <li role="presentation">
          <a href="#t_plugins" aria-controls="t_plugins" role="tab" data-toggle="tab">
             <i class="fa fa-puzzle-piece"></i>
-            <span class="hidden-xs">&nbsp; Plugins</span>
+            <span class="hidden-xs">&nbsp; Modulos</span>
          </a>
       </li>
-      <li role="presentation">
-         <a href="#t_descargas" aria-controls="t_descargas" role="tab" data-toggle="tab">
-            <span class="glyphicon glyphicon-download-alt"></span>
-            <span class="hidden-xs">&nbsp; Descargas</span>
-            {if="$fsc->new_downloads>0"}
-            <span class="badge" title="Hay {$fsc->new_downloads} nuevas descargas">{$fsc->new_downloads}</span>
-            {/if}
-         </a>
-      </li>
-      <li role="presentation">
+      <li role="presentation" style="display: none;">
          <a href="#t_avanzado" aria-controls="t_avanzado" role="tab" data-toggle="tab">
             <span class="glyphicon glyphicon-wrench"></span>
             <span class="hidden-xs">&nbsp; Avanzado</span>
@@ -279,9 +156,6 @@
                      {/if}
                   </td>
                   <td class="text-right">
-                     <a href="{#FS_COMMUNITY_URL#}/index.php?page=community_changelog&plugin={$value['name']}&version={$value['version']}" target="_blank">
-                        {$value['version']}
-                     </a>
                   </td>
                   <td class="text-right">{$value['prioridad']}</td>
                   <td class="text-right">
@@ -325,95 +199,6 @@
                   </div>
                </div>
             </div>
-         </div>
-      </div>
-      <div role="tabpanel" class="tab-pane" id="t_descargas">
-         <div class="table-responsive">
-            <table class="table table-hover">
-               <thead>
-                  <tr>
-                     <th></th>
-                     <th class="text-left">Plugin</th>
-                     <th class="text-left">Descripción</th>
-                     <th></th>
-                  </tr>
-               </thead>
-               {loop="$fsc->download_list"}
-               <tr{if="file_exists('plugins/'.$key)"} class="success"{/if}>
-                  <td class="text-right">
-                     <span class="glyphicon glyphicon-bookmark" aria-hidden="true" title="Destacado"></span>
-                  </td>
-                  <td>{$key}</td>
-                  <td>
-                     {$value['description']}<br/>
-                     <a href="{$value['url_repo']}" target="_blank">Web del proyecto</a>.
-                  </td>
-                  <td class="text-right">
-                     {if="file_exists('plugins/'.$key)"}
-                     <a href="{$fsc->url()}&caca={$fsc->random_string(4)}#plugins" class="btn btn-xs btn-default">
-                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> &nbsp; Instalado
-                     </a>
-                     {else}
-                     <a href="{$fsc->url()}&caca={$fsc->random_string(4)}&download={$key}#plugins" class="btn btn-xs btn-primary">
-                        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span> &nbsp; Descargar
-                     </a>
-                     {/if}
-                  </td>
-               </tr>
-               {/loop}
-               {loop="$fsc->download_list2"}
-               <tr{if="file_exists('plugins/'.$value->nombre)"} class="success"{elseif="!$value->estable"} class="danger"{elseif="$value->nuevo"} class="info"{/if}>
-                  <td>
-                     {if="!$value->estable"}
-                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" title="Todavía en desarrollo. Inestable."></span>
-                     {/if}
-                  </td>
-                  <td>
-                     {$value->nombre}
-                     {if="$value->imagen"}
-                     <div style="margin-bottom: 5px"></div>
-                        {if="!$value->zip_link"}
-                        <a href="{$value->link}" target="_blank">
-                           <img src="{$value->imagen}" alt="{$value->nombre}" width="80"/>
-                        </a>
-                        {else}
-                        <a href="{$value->imagen}" target="_blank">
-                           <img src="{$value->imagen}" alt="{$value->nombre}" width="80"/>
-                        </a>
-                        {/if}
-                     {/if}
-                  </td>
-                  <td>
-                     {function="nl2br($value->descripcion)"}<br/>
-                     {if="substr($value->zip_link, -4) == '.zip'"}
-                     <a href="{$value->link}" target="_blank">Web del proyecto</a>. &nbsp;
-                     {/if}
-                     Autor: {$value->nick}.
-                  </td>
-                  <td class="text-right">
-                     {if="file_exists('plugins/'.$value->nombre)"}
-                     <a href="{$fsc->url()}&caca={$fsc->random_string(4)}#plugins" class="btn btn-xs btn-default">
-                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> &nbsp; Instalado
-                     </a>
-                     {elseif="$value->zip_link"}
-                        {if="$value->estable"}
-                        <a href="{$fsc->url()}&caca={$fsc->random_string(4)}&download2={$value->id}#plugins" class="btn btn-xs btn-primary">
-                           <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span> &nbsp; Descargar
-                        </a>
-                        {else}
-                        <a href="#" class="btn btn-xs btn-primary" onclick="descargar_plugin_inestable('{$value->id}')">
-                           <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span> &nbsp; Descargar
-                        </a>
-                        {/if}
-                     {else}
-                     <a href="{$value->link}" target="_blank" class="btn btn-xs btn-info">
-                        <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> &nbsp; Comprar
-                     </a>
-                     {/if}
-                  </td>
-               </tr>
-               {/loop}
-            </table>
          </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="t_avanzado">
@@ -539,10 +324,10 @@
                      <div class="form-group">
                         Comprobaciones en la base de datos:
                         <select name="check_db_types" class="form-control">
-                           <option value="true"{if="$GLOBALS['config2']['check_db_types']==1"} selected=''{/if}>
+                           <option value="1"{if="$GLOBALS['config2']['check_db_types']==1"} selected=''{/if}>
                               Comprobar los tipos de las columnas de las tablas
                            </option>
-                           <option value="false"{if="$GLOBALS['config2']['check_db_types']!=1"} selected=''{/if}>
+                           <option value="0"{if="$GLOBALS['config2']['check_db_types']!=1"} selected=''{/if}>
                               No comprobar los tipos
                            </option>
                         </select>
@@ -600,12 +385,12 @@
                <div class="row" style="margin-top: 20px;">
                   <div class="col-md-6 col-sm-6">
                      <button class="btn btn-sm btn-danger" type="button" onclick="window.location.href='{$fsc->url()}&caca={$fsc->random_string(4)}&reset=TRUE#avanzado'">
-                        <span class="glyphicon glyphicon-trash"></span> &nbsp; Reiniciar
+                        <span class="glyphicon glyphicon-edit"></span>&nbsp; Configuración por defecto
                      </button>
                   </div>
                   <div class="col-md-6 col-sm-6 text-right">
                      <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();">
-                        <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Guardar
+                        <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guardar
                      </button>
                   </div>
                </div>
@@ -641,7 +426,7 @@
                   nada.
                </p>
                <button type="submit" class="btn btn-primary" onclick="this.disabled=true;this.form.submit();">
-                  <span class="glyphicon glyphicon-import" aria-hidden="true"></span> &nbsp; Añadir
+                  <span class="glyphicon glyphicon-import" aria-hidden="true"></span>&nbsp; Añadir
                </button>
             </form>
          </div>

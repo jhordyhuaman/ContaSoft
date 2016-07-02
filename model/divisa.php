@@ -1,50 +1,12 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/**
- * Una divisa (moneda) con su símbolo y su tasa de conversión respecto al euro.
- */
 class divisa extends fs_model
 {
-   /**
-    * Clave primaria. Varchar (3).
-    * @var type 
-    */
+   
    public $coddivisa;
    public $descripcion;
-   
-   /**
-    * Tasa de conversión respecto al euro.
-    * @var type 
-    */
    public $tasaconv;
-   
-   /**
-    * Tasa de conversión respecto al euro (para compras).
-    * @var type 
-    */
    public $tasaconv_compra;
-   
-   /**
-    * código ISO 4217 en número: http://en.wikipedia.org/wiki/ISO_4217
-    * @var type
-    */
    public $codiso;
    public $simbolo;
 
@@ -200,10 +162,6 @@ class divisa extends fs_model
       $this->cache->delete('m_divisa_all');
    }
    
-   /**
-    * Devuelve un array con todas las divisas.
-    * @return \divisa
-    */
    public function all()
    {
       $listad = $this->cache->get_array('m_divisa_all');

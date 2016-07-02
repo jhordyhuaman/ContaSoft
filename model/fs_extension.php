@@ -1,65 +1,13 @@
 <?php
-/*
- * This file is part of FacturaSctipts
- * Copyright (C) 2013-2016  Carlos Garcia Gomez  neorazorx@gmail.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/**
- * Permite que un plugin añada elementos a una vista existente,
- * sin necesidad de un reemplazo completo.
- * Los tipos soportados depende de cada página, pero suelen ser:
- * head, css, button y tab.
- */
 class fs_extension extends fs_model
 {
-   /**
-    * Identificador de la extensión para poder buscarlo fácilemnte.
-    * No es la clave primaria. La clave primaria es name+from.
-    * @var type 
-    */
+   
    public $name;
-   
-   /**
-    * Nombre de la página (controlador) que ofrece la extensión.
-    * @var type 
-    */
    public $from;
-   
-   /**
-    * Nombre de la página (controlador) que recibe la extensión.
-    * @var type 
-    */
    public $to;
-   
-   /**
-    * Tipo de extensión: head, css, button, tab...
-    * @var type 
-    */
    public $type;
-   
-   /**
-    * Texto del botón, del tab...
-    * @var type 
-    */
    public $text;
-   
-   /**
-    * Parámetros extra para la URL. Debes añadir el &
-    * @var type 
-    */
    public $params;
    
    public function __construct($e = FALSE)

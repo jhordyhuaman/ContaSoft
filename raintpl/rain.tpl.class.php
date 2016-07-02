@@ -1,12 +1,4 @@
 <?php
-/**
- *  RainTPL
- *  -------
- *  Realized by Federico Ulfo & maintained by the Rain Team
- *  Distributed under GNU/LGPL 3 License
- *
- *  @version 2.7.2
- */
 
 class RainTPL
 {
@@ -244,14 +236,14 @@ class RainTPL
          
          $tpl_dir = self::$tpl_dir.$tpl_basedir;
          
-         /// buscamos la plantilla en los plugins activos
-         if( isset($GLOBALS['plugins']) )
+         /// buscamos la plantilla en los modulos activos
+         if( isset($GLOBALS['modulos']) )
          {
-            foreach($GLOBALS['plugins'] as $plugin_dir)
+            foreach($GLOBALS['modulos'] as $plugin_dir)
             {
-               if( file_exists('plugins/'.$plugin_dir.'/view/'.$tpl_name.'.'.self::$tpl_ext) )
+               if( file_exists('modulos/'.$plugin_dir.'/view/'.$tpl_name.'.'.self::$tpl_ext) )
                {
-                  $tpl_dir = 'plugins/'.$plugin_dir.'/view/'.$tpl_basedir;
+                  $tpl_dir = 'modulos/'.$plugin_dir.'/view/'.$tpl_basedir;
                   break;
                }
             }
@@ -935,25 +927,7 @@ class RainTpl_NotFoundException extends RainTpl_Exception
 {
    public function __construct($message, $code = 0, Exception $previous = NULL)
    {
-      echo <<<END
-<!DOCTYPE html>
-<html>
-   <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <title>FacturaScripts</title>
-      <meta name="description" content="FacturaScripts es un software libre bajo licencia GNU/LGPL." />
-   </head>
-   <body>
-      <h1>$message</h1>
-      <p>
-         Si necesitas ayuda, recuerda que
-         <a target="_blank" href="https://www.facturascripts.com">la comunidad FacturaScripts</a>
-         está para ayudarte.
-      </p>
-   </body>
-</html>
-END;
-      
+     echo "Error no se encontro el archivo";
       parent::__construct($message, $code, $previous);
    }
 }
