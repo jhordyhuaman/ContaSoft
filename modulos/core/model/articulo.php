@@ -373,13 +373,13 @@ class articulo extends fs_model
    
    public function get_lineas_albaran_cli($offset=0, $limit=FS_ITEM_LIMIT)
    {
-      $linea = new linea_albaran_cliente();
+      $linea = new linea_factura_cliente();
       return $linea->all_from_articulo($this->referencia, $offset, $limit);
    }
    
    public function get_lineas_albaran_prov($offset=0, $limit=FS_ITEM_LIMIT)
    {
-      $linea = new linea_albaran_proveedor();
+      $linea = new linea_factura_proveedor();
       return $linea->all_from_articulo($this->referencia, $offset, $limit);
    }
    
