@@ -21,7 +21,7 @@
                onclick=\"show_buscar_subcuentas('"+numlineas+"','subcuenta')\" onkeyup='document.f_buscar_subcuentas.query.value=$(this).val();buscar_subcuentas()'\n\
                autocomplete='off' placeholder='Seleccionar'/></div>\n\
                <input type='hidden' id='desc_"+numlineas+"' name='scuenta_name' value=''/>\n\
-               <div class='col-sm-6'><input class='form-control' type='text' id='descri' name='desc_"+numlineas+"' disabled='disabled'/></div>");
+               <div class='col-sm-5'><input class='form-control' type='text' id='descri' name='desc_"+numlineas+"' disabled='disabled'/></div>");
 
       document.f_new_albaran.numlineas.value = numlineas;
       recalcular();
@@ -131,12 +131,7 @@
             </div>
          </div>
          <hr/>
-         <div class="col-sm-6" id="cuentas">
-            <a href="#" class="btn btn-sm btn-success" onclick="add_cuenta();return false;">
-               <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-               <span class="hidden-xs">&nbsp; Añadir Cuentas</span>
-            </a>
-         </div>
+
       </div>
    </div>
    
@@ -273,7 +268,12 @@
                <span class="glyphicon glyphicon-refresh"></span>&nbsp; Reiniciar
             </button>
          </div>
-         <div class="col-sm-6 text-right">
+         <div class="col-sm-6 text-right" id="cuentas">
+               <a href="#" class="btn btn-sm btn-success" onclick="add_cuenta();return false;">
+                  <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                  <span class="hidden-xs">&nbsp; Añadir Cuentas</span>
+               </a>
+
             <button class="btn btn-sm btn-primary" type="button" onclick="$('#modal_guardar').modal('show');">
                <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guardar...
             </button>

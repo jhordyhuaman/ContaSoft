@@ -4,7 +4,7 @@ var fs_nf0 = 2;
 var all_impuestos = [];
 var all_series = [];
 var cliente = false;
-var nueva_venta_url = '';
+var nueva_venta_url = 'index.php?page=nueva_venta&tipo=factura';
 var kiwimaru_url = '';
 var fin_busqueda1 = true;
 var fin_busqueda2 = true;
@@ -488,9 +488,10 @@ function buscar_articulos()
    else
    {
       $("#nav_articulos").show();
-      
+
       if(nueva_venta_url !== '')
       {
+
          fin_busqueda1 = false;
          $.getJSON(nueva_venta_url, $("form[name=f_buscar_articulos]").serialize(), function(json) {
             var items = [];
