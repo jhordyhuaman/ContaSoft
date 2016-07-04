@@ -80,7 +80,7 @@
                console.log(data);
                var cuenta = "4011";
                var descri = "IMPUESTO GENERAL A LAS VENTAS";
-               var cuenta2 = "701";
+               var cuenta2 = "7011";
                var descri2 = "MERCADERIA";
                var saldo = 0;
                var saldo_701 = 0;
@@ -180,10 +180,6 @@
 
                $('#partidas').append(datos);
 
-
-
-
-
                $('#num_linea').val(numlineas);
 
 
@@ -235,7 +231,7 @@
    }
    function cent_compra(v) {
       if(v===true){
-         //$('#f_cent_ventas').submit();
+         $('#f_cent_ventas').submit();
          console.log($('#f_cent_ventas').serializeArray());
          $('#modal_cent_compra').modal('hidden');
 
