@@ -666,11 +666,13 @@
       <tr>
          <th></th>
          <th></th>
+         <th class="text-left">Fecha</th>
          <th class="text-left">Código + Num. Proveedor</th>
          <th class="text-left">Proveedor</th>
          <th class="text-left">Observaciones</th>
+         <th class="text-right">Base Imponible</th>
+         <th class="text-right">IGV</th>
          <th class="text-right">Total</th>
-         <th class="text-right">Fecha</th>
       </tr>
       </thead>
       {loop="$fsc->resultados"}
@@ -686,6 +688,9 @@
             <span class="glyphicon glyphicon-flag" title="{#FS_FACTURA_RECTIFICATIVA#} de {$value->codigorect}"></span>
             {/if}
          </td>
+         <td class="text-right" title="Hora {$value->hora}">
+            {if="$value->fecha==$fsc->today()"}<b>{$value->fecha}</b>{else}{$value->fecha}{/if}
+         </td>
          <td class="text-center">
             {if="$value->idasiento"}
             <span class="glyphicon glyphicon-paperclip" title="La factura tiene vinculado un asiento contable"></span>
@@ -697,10 +702,10 @@
             <a href="{$fsc->url()}&codproveedor={$value->codproveedor}" class="cancel_clickable" title="Ver más facturas de {$value->nombre}">[+]</a>
          </td>
          <td>{$value->observaciones_resume()}</td>
+         <td class="text-right">{$fsc->show_precio($value->neto, $value->coddivisa)}</td>
+         <td class="text-right">{$fsc->show_precio($value->totaliva, $value->coddivisa)}</td>
          <td class="text-right">{$fsc->show_precio($value->total, $value->coddivisa)}</td>
-         <td class="text-right" title="Hora {$value->hora}">
-            {if="$value->fecha==$fsc->today()"}<b>{$value->fecha}</b>{else}{$value->fecha}{/if}
-         </td>
+
       </tr>
       {else}
       <tr class="warning">
@@ -722,6 +727,14 @@
       </tr>
       {/if}
    </table>
+   <hr/>
+
+</div>
+<div class="row">
+   <div class="col-lg-9">Totales:</div>
+   <div class="col-md-1 text-right">B.I :<p id="bi"></p></div>
+   <div class="col-md-1 text-right">IGV :<p id="igv"></p></div>
+   <div class="col-md-1 text-right">I.Total:<p id="itotal"></p></div>
 </div>
 
 <div class="container-fluid">
