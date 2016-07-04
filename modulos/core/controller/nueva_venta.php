@@ -643,7 +643,7 @@ class nueva_venta extends fs_controller
                   $linea->dtopor = floatval($_POST['dto_'.$i]);
                   $linea->pvpsindto = ($linea->pvpunitario * $linea->cantidad);
                   $linea->pvptotal = floatval($_POST['neto_'.$i]);
-                  
+
                   $articulo = $art0->get($_POST['referencia_'.$i]);
                   if($articulo)
                   {
@@ -857,7 +857,9 @@ class nueva_venta extends fs_controller
                   $linea->dtopor = floatval($_POST['dto_'.$i]);
                   $linea->pvpsindto = ($linea->pvpunitario * $linea->cantidad);
                   $linea->pvptotal = floatval($_POST['neto_'.$i]);
-                  
+                  $linea->namescuenta = $_POST['scuenta_name'];
+                  $linea->idsubcuenta = $_POST['idsubcuenta'];
+
                   $articulo = $art0->get($_POST['referencia_'.$i]);
                   if($articulo)
                   {

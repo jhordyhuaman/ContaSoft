@@ -4,86 +4,27 @@
 require_model('albaran_cliente.php');
 require_model('factura_cliente.php');
 
-/**
- * Línea de una factura de cliente.
- */
+
 class linea_factura_cliente extends fs_model
 {
-   /**
-    * Clave primaria.
-    * @var type 
-    */
+
    public $idlinea;
-   
-   /**
-    * ID de la factura de esta línea.
-    * @var type 
-    */
    public $idfactura;
-   
-   /**
-    * ID del albarán relacionado con esta factura, si lo hay.
-    * @var type 
-    */
    public $idalbaran;
-   
-   /**
-    * Importe neto de la línea, sin impuestos.
-    * @var type 
-    */
    public $pvptotal;
-   
-   /**
-    * % de descuento.
-    * @var type 
-    */
    public $dtopor;
-   
-   /**
-    * % de recargo de equivalencia.
-    * @var type 
-    */
    public $recargo;
-   
-   /**
-    * % de IRPF.
-    * @var type 
-    */
    public $irpf;
-   
-   /**
-    * Importe neto sin descuentos.
-    * @var type 
-    */
    public $pvpsindto;
    public $cantidad;
-   
-   /**
-    * Impuesto del artículo.
-    * @var type 
-    */
    public $codimpuesto;
-   
-   /**
-    * Precio del artículo, una unidad.
-    * @var type 
-    */
    public $pvpunitario;
-   
    public $descripcion;
-   
-   /**
-    * Referencia del artículo.
-    * @var type 
-    */
    public $referencia;
-   
-   /**
-    * % de IVA de la línea, el que corresponde al impuesto.
-    * @var type 
-    */
    public $iva;
-   
+   public $namescuenta;
+   public $idsubcuenta;
+
    private $codigo;
    private $fecha;
    private $albaran_codigo;
@@ -123,6 +64,8 @@ class linea_factura_cliente extends fs_model
          $this->iva = floatval($l['iva']);
          $this->recargo = floatval($l['recargo']);
          $this->irpf = floatval($l['irpf']);
+         $this->namescuenta = $l['namescuenta'];
+         $this->idsubcuenta = $l['idsubcuenta'];
       }
       else
       {
@@ -140,6 +83,8 @@ class linea_factura_cliente extends fs_model
          $this->iva = 0;
          $this->recargo = 0;
          $this->irpf = 0;
+         $this->namescuenta = NULL;
+         $this->idsubcuenta = NULL;
       }
    }
    
@@ -381,6 +326,8 @@ class linea_factura_cliente extends fs_model
                     .", iva = ".$this->var2str($this->iva)
                     .", recargo = ".$this->var2str($this->recargo)
                     .", irpf = ".$this->var2str($this->irpf)
+                    .", idsubcuenta = ".$this->var2str($this->idsubcuenta)
+                    .", namescuenta".$this->var2str($this->namescuenta)
                     ."  WHERE idlinea = ".$this->var2str($this->idlinea).";";
             
             return $this->db->exec($sql);
@@ -388,7 +335,7 @@ class linea_factura_cliente extends fs_model
          else
          {
             $sql = "INSERT INTO ".$this->table_name." (idfactura,idalbaran,referencia,
-               descripcion,cantidad,pvpunitario,pvpsindto,dtopor,pvptotal,codimpuesto,iva,recargo,irpf)
+               descripcion,cantidad,pvpunitario,pvpsindto,dtopor,pvptotal,codimpuesto,iva,recargo,idsubcuenta,namescuenta,irpf)
                VALUES (".$this->var2str($this->idfactura)
                     .",".$this->var2str($this->idalbaran)
                     .",".$this->var2str($this->referencia)
@@ -401,6 +348,8 @@ class linea_factura_cliente extends fs_model
                     .",".$this->var2str($this->codimpuesto)
                     .",".$this->var2str($this->iva)
                     .",".$this->var2str($this->recargo)
+                    .",".$this->var2str($this->idsubcuenta)
+                    .",".$this->var2str($this->namescuenta)
                     .",".$this->var2str($this->irpf).");";
             
             if( $this->db->exec($sql) )
@@ -420,7 +369,20 @@ class linea_factura_cliente extends fs_model
    {
       return $this->db->exec("DELETE FROM ".$this->table_name." WHERE idlinea = ".$this->var2str($this->idlinea).";");
    }
-   
+   public function all_factura_cli()
+   {
+      $linlist = array();
+      $sql = "select * from gen_factura_cli";
+      $data = $this->db->select($sql);
+      if($data)
+      {
+         foreach($data as $l)
+         {
+            $linlist[] = new linea_factura_cliente($l);
+         }
+      }
+      return $linlist;
+   }
    public function all_from_factura($id)
    {
       $linlist = array();

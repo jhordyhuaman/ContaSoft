@@ -145,5 +145,6 @@ else
       
       $tpl->draw( $fsc->template );
    }
+  // echo json_encode($fsc);
    $fsc->close();
 }

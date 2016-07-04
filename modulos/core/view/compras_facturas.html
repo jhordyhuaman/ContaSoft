@@ -79,9 +79,10 @@
                var descri = "IMPUESTO GENERAL A LAS VENTAS";
                var saldo = 0;
                var total_libro = 0;
+               $('#partidas tr').remove();
                $.each(data,function (i,json) {
                   if(json.codimpuesto != 'EXO'){
-                     saldo +=json.pvptotal*0.18;
+                     saldo +=roundToTwo(json.pvptotal*0.18);
                   }
                   total_libro += json.pvptotal;
                   numlineas = i+1;
@@ -100,7 +101,8 @@
                           '<label class="radio-inline" style="font-size: 9px; color:#91170a"><input  id="chechaber_'+numlineas+'"  value="haber" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)"/>Haber</label>'+
                           '</div>'+
                           '</div>'+
-                          '</div></td>'+
+                          '</div>' +
+                          '</td>'+
                           "<td>\n\
                          <input class='form-control text-right' type='text' id='saldo_"+numlineas+"' name='saldo_"+numlineas+"' value='"+json.pvptotal+"' disabled='disabled'/>\n\
             </td>\n\
@@ -144,11 +146,123 @@
                $('#partidas').append(datos);
 
 
+               var cuen4212=0;
+               var cuen4654=0;
+               var cuen4655=0;
+               $('#partidas tr').each(function(){
 
+                  var cuentas = $(this).find('td').eq(0).find('input').val();
+                  var cantidad = $(this).find('td').eq(3).find('input').val();
+                  var cuentaprincipal=0;
+
+                  if(cuentas=='6561'||cuentas=='6011'||cuentas=='6032'){
+                     cuen4212+=roundToTwo(cantidad)+roundToTwo(cantidad*0.18);
+
+                  }
+                  if(cuentas=='3351'){
+                     cuen4654+=roundToTwo(cantidad)+roundToTwo(cantidad*0.18);
+
+                  }
+
+                  cuentaprincipal=cuentas.substr(0,2);
+                  console.log(cuentaprincipal);
+                  if(cuentaprincipal=='63'){
+                     cuen4655+=roundToTwo(cantidad)+roundToTwo(cantidad*0.18);
+                     console.log(cuentaprincipal+' '+cantidad);
+                  }
+
+               });
+
+               numlineas++;
+               var datos1 = "<tr id='partida_"+numlineas+"'>\n\
+             <td>\n\
+            <input class='form-control' id='codsubcuenta_"+numlineas+"' name='codsubcuenta_"+numlineas+"' type='text' value='4212'</td>\n\
+             <td>\n\
+            <input class='form-control' type='text' id='desc_"+numlineas+"' name='desc_"+numlineas+"' disabled='disabled' value='Emitidas'/>\n\
+             </td>"+
+                       '<td><div class="form-control">'+
+                       '<div class="row" style="position: relative; left: 8px; bottom: 9px">' +
+                       '<div type="checkbox" class="col-ms-6">' +
+                       '<label class="radio-inline" style="font-size: 9px; color:#1a237e"><input  id="checdebe_'+numlineas+'" value="debe" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Debe</label>'+
+                       '</div>'+
+                       '<div type="checkbox" class="col-ms-6" style="position: relative; bottom: 3px">'+
+                       '<label class="radio-inline" style="font-size: 9px; color:#91170a"><input  id="chechaber_'+numlineas+'"  value="haber" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Haber</label>'+
+                       '</div>'+
+                       '</div>'+
+                       '</div></td>'+
+                       " <td><input class='form-control text-right' type='text' id='saldo_"+numlineas+"' name='saldo_"+numlineas+"' value='"+cuen4212+"' disabled='disabled'/>\n\
+            </td>\n\
+             <td>\n\
+            <input class='form-control text-right' type='text' id='debe_"+numlineas+"' name='debe_"+numlineas+"' value='0' />\n\
+             </td>\n\
+            <td>\n\
+            <input class='form-control text-right' type='text' id='haber_"+numlineas+"' name='haber_"+numlineas+"' value='0'/>\n\
+            </td></tr>";
+               $('#partidas').append(datos1);
+
+               numlineas++;
+               datos1= "<tr id='partida_"+numlineas+"'>\n\
+                  <td>\n\
+                     <input class='form-control' id='codsubcuenta_"+numlineas+"' name='codsubcuenta_"+numlineas+"' type='text' value='4654'</td>\n\
+                  <td>\n\
+                     <input class='form-control' type='text' id='desc_"+numlineas+"' name='desc_"+numlineas+"' disabled='disabled' value='INMUEBLES MAQUINARIA Y EQUPOS'/>\n\
+                  </td>"+
+                  '<td><div class="form-control">'+
+                     '<div class="row" style="position: relative; left: 8px; bottom: 9px">' +
+                        '<div type="checkbox" class="col-ms-6">' +
+                           '<label class="radio-inline" style="font-size: 9px; color:#1a237e"><input  id="checdebe_'+numlineas+'" value="debe" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Debe</label>'+
+                           '</div>'+
+                        '<div type="checkbox" class="col-ms-6" style="position: relative; bottom: 3px">'+
+                           '<label class="radio-inline" style="font-size: 9px; color:#91170a"><input  id="chechaber_'+numlineas+'"  value="haber" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Haber</label>'+
+                           '</div>'+
+                        '</div>'+
+                     '</div></td>'+
+                  " <td><input class='form-control text-right' type='text' id='saldo_"+numlineas+"' name='saldo_"+numlineas+"' value='"+cuen4654+"' disabled='disabled'/>\n\
+                  </td>\n\
+                  <td>\n\
+                     <input class='form-control text-right' type='text' id='debe_"+numlineas+"' name='debe_"+numlineas+"' value='0' />\n\
+                  </td>\n\
+                  <td>\n\
+                     <input class='form-control text-right' type='text' id='haber_"+numlineas+"' name='haber_"+numlineas+"' value='0'/>\n\
+                  </td></tr>";
+               $('#partidas').append(datos1);
+
+               numlineas++;
+               datos1= "<tr id='partida_"+numlineas+"'>\n\
+                  <td>\n\
+                     <input class='form-control' id='codsubcuenta_"+numlineas+"' name='codsubcuenta_"+numlineas+"' type='text' value='4655'</td>\n\
+                  <td>\n\
+                     <input class='form-control' type='text' id='desc_"+numlineas+"' name='desc_"+numlineas+"' disabled='disabled' value='INTANGIBLE'/>\n\
+                  </td>"+
+                       '<td><div class="form-control">'+
+                       '<div class="row" style="position: relative; left: 8px; bottom: 9px">' +
+                       '<div type="checkbox" class="col-ms-6">' +
+                       '<label class="radio-inline" style="font-size: 9px; color:#1a237e"><input  id="checdebe_'+numlineas+'" value="debe" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Debe</label>'+
+                       '</div>'+
+                       '<div type="checkbox" class="col-ms-6" style="position: relative; bottom: 3px">'+
+                       '<label class="radio-inline" style="font-size: 9px; color:#91170a"><input  id="chechaber_'+numlineas+'"  value="haber" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Haber</label>'+
+                       '</div>'+
+                       '</div>'+
+                       '</div></td>'+
+                       " <td><input class='form-control text-right' type='text' id='saldo_"+numlineas+"' name='saldo_"+numlineas+"' value='"+cuen4655+"' disabled='disabled'/>\n\
+                  </td>\n\
+                  <td>\n\
+                     <input class='form-control text-right' type='text' id='debe_"+numlineas+"' name='debe_"+numlineas+"' value='0' />\n\
+                  </td>\n\
+                  <td>\n\
+                     <input class='form-control text-right' type='text' id='haber_"+numlineas+"' name='haber_"+numlineas+"' value='0'/>\n\
+                  </td></tr>";
+
+               $('#partidas').append(datos1);
 
                $('.total_libro').val(total_libro);
+               $('#form_importe').val(total_libro);
+
+
                $('#modal_cent_compra').modal('show');
                $('#num_linea').val(numlineas);
+
+
             },
             error:function (data) {
                alert("Error ¡¡");
@@ -163,6 +277,11 @@
 
 
    });
+
+
+   function roundToTwo(num) {
+      return +(Math.round(num + "e+2")  + "e-2");
+   }
 
    function combobox(e){
 
@@ -180,9 +299,27 @@
 
       }
 
+      var sladohaber=0;
+      var sladodebe=0;
 
+      $('#partidas tr').each(function() {
+         var asignar = $(this).find('td').eq(2).find('input:checked').val();
+         var saldo = $(this).find('td').eq(3).find('input').val();
+         console.log(asignar);
+         if(asignar=='debe'){
+            sladodebe+=roundToTwo(saldo);
+         }else if(asignar=='haber'){
+            sladohaber+=roundToTwo(saldo);
+         }
+
+      });
+      var descuadre=sladodebe-sladohaber;
+
+      $('#form_descuadre').val(descuadre);
 
    }
+
+
 
    function cent_compra(v) {
       if(v===true){
@@ -222,63 +359,65 @@
                         <div class="col-lg-2 col-md-2 col-sm-2">
                            <div class="form-group">
                               Importe:
-                              <input class="form-control" type="text" name="importe" value="0" readonly/>
+                              <input id="form_importe" class="form-control" type="text" name="importe" value="0" readonly/>
                            </div>
                         </div>
-                        <div class="col-lg-1 col-md-2 col-sm-2">
+                        <div class="col-lg-2 col-md-2 col-sm-2">
                            <div class="form-group">
                               Descuadre:
-                              <input class="form-control" type="text" name="descuadre" value="0" readonly/>
+                              <input id="form_descuadre"  val="No definido" class="form-control" type="text" name="descuadre" readonly/>
                            </div>
                         </div>
                      </div>
                   </div>
-                     <div class="table-responsive">
-                        <table class="table table-hover">
-                           <thead>
-                           <tr>
-                              <th class="text-left" width="100">Subcuenta</th>
-                              <th class="text-left">Descripción</th>
-                              <th class="text-left">Asignar</th>
-                              <th class="text-right" width="110">Saldo</th>
-                              <th class="text-right" width="110">Debe</th>
-                              <th class="text-right" width="110">Haber</th>
-                           </tr>
-                           </thead>
-                           <tbody id="partidas">
-                           </tbody>
-                        </table>
-                     </div>
-                     <div class="container-fluid">
-                        <div class="row">
-                           <div class="col-sm-9">
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                        <tr>
+                           <th class="text-left" width="100">Subcuenta</th>
+                           <th class="text-left">Descripción</th>
+                           <th class="text-left">Asignar</th>
+                           <th class="text-right" width="110">Saldo</th>
+                           <th class="text-right" width="110">Debe</th>
+                           <th class="text-right" width="110">Haber</th>
+                        </tr>
+                        </thead>
+                        <tbody id="partidas">
 
-                           </div>
-                           <div class="col-sm-3">
-                               Importe Total:<input type="text" class="total_libro form-control" placeholder="Total"/>
-                           </div>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="container-fluid">
+                     <div class="row">
+                        <div class="col-sm-9">
+
                         </div>
-                        <hr/>
-                        <div class="row">
-                           <div class="col-xs-6">
-                           </div>
-                           <div class="col-xs-6 text-right">
-                              <div class="btn-group">
-                                 <button id="b_guardar_asiento" class="btn btn-sm btn-primary" type="button" onclick="cent_compra(true)" title="Guardar y volver a empezar">
-                                    <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Centralisar Libro Compras
-                                 </button>
-                              </div>
+                        <div class="col-sm-3">
+                           Importe Total:<input type="text" class="total_libro form-control" placeholder="Total"/>
+                        </div>
+                     </div>
+                     <hr/>
+                     <div class="row">
+                        <div class="col-xs-6">
+                        </div>
+                        <div class="col-xs-6 text-right">
+                           <div class="btn-group">
+                              <button id="b_guardar_asiento" class="btn btn-sm btn-primary" type="button" onclick="cent_compra(true)" title="Guardar y volver a empezar">
+                                 <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Centralisar Libro Compras
+                              </button>
                            </div>
                         </div>
                      </div>
                   </div>
-
                </div>
+
             </div>
          </div>
       </div>
    </div>
+   </div>
 </form>
+
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
    <div class="row">
       <div class="col-sm-8 col-xs-6">
@@ -306,9 +445,9 @@
                <span class="hidden-xs">&nbsp; Centralizar Compras</span>
             </a>
             {loop="$fsc->extensions"}
-               {if="$value->type=='button'"}
-               <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
-               {/if}
+            {if="$value->type=='button'"}
+            <a href="index.php?page={$value->from}{$value->params}" class="btn btn-sm btn-default">{$value->text}</a>
+            {/if}
             {/loop}
          </div>
       </div>
@@ -364,32 +503,32 @@
 
 <ul class="nav nav-tabs" role="tablist">
    <li{if="$fsc->mostrar=='todo'"} class="active"{/if}>
-      <a href="{$fsc->url()}&mostrar=todo">
-         <span class="text-capitalize hidden-xs">Facturas (todo)</span>
-         <span class="visible-xs">Todo</span>
-      </a>
+   <a href="{$fsc->url()}&mostrar=todo">
+      <span class="text-capitalize hidden-xs">Facturas (todo)</span>
+      <span class="visible-xs">Todo</span>
+   </a>
    </li>
    <li{if="$fsc->mostrar=='sinpagar'"} class="active"{/if}>
-      <a href="{$fsc->url()}&mostrar=sinpagar">
-         <span class="glyphicon glyphicon-pushpin"></span>
-         <span class="hidden-xs">&nbsp; Sin pagar</span>
-         <span class="hidden-xs badge">{$fsc->total_sinpagar()}</span>
-      </a>
+   <a href="{$fsc->url()}&mostrar=sinpagar">
+      <span class="glyphicon glyphicon-pushpin"></span>
+      <span class="hidden-xs">&nbsp; Sin pagar</span>
+      <span class="hidden-xs badge">{$fsc->total_sinpagar()}</span>
+   </a>
    </li>
    <li{if="$fsc->mostrar=='buscar'"} class="active"{/if}>
-      <a href="{$fsc->url()}&mostrar=buscar" title="Buscar">
-         <span class="glyphicon glyphicon-search"></span>
-         {if="$fsc->num_resultados!==''"}
-         <span class="hidden-xs badge">{$fsc->num_resultados}</span>
-         {/if}
-      </a>
+   <a href="{$fsc->url()}&mostrar=buscar" title="Buscar">
+      <span class="glyphicon glyphicon-search"></span>
+      {if="$fsc->num_resultados!==''"}
+      <span class="hidden-xs badge">{$fsc->num_resultados}</span>
+      {/if}
+   </a>
    </li>
    {loop="$fsc->extensions"}
-      {if="$value->type=='tab'"}
-      <li{if="$fsc->mostrar=='ext_'.$value->name"} class="active"{/if}>
-         <a href="{$fsc->url()}&mostrar=ext_{$value->name}">{$value->text}</a>
-      </li>
-      {/if}
+   {if="$value->type=='tab'"}
+   <li{if="$fsc->mostrar=='ext_'.$value->name"} class="active"{/if}>
+   <a href="{$fsc->url()}&mostrar=ext_{$value->name}">{$value->text}</a>
+   </li>
+   {/if}
    {/loop}
 </ul>
 
@@ -421,11 +560,11 @@
                   <option value="">Cualquier {#FS_SERIE#}</option>
                   <option value="">-----</option>
                   {loop="$fsc->serie->all()"}
-                     {if="$value->codserie==$fsc->codserie"}
-                     <option value="{$value->codserie}" selected="">{$value->descripcion}</option>
-                     {else}
-                     <option value="{$value->codserie}">{$value->descripcion}</option>
-                     {/if}
+                  {if="$value->codserie==$fsc->codserie"}
+                  <option value="{$value->codserie}" selected="">{$value->descripcion}</option>
+                  {else}
+                  <option value="{$value->codserie}">{$value->descripcion}</option>
+                  {/if}
                   {/loop}
                </select>
             </div>
@@ -436,11 +575,11 @@
                   <option value="">Cualquier empleado</option>
                   <option value="">------</option>
                   {loop="$fsc->agente->all()"}
-                     {if="$value->codagente==$fsc->codagente"}
-                     <option value="{$value->codagente}" selected="">{$value->get_fullname()}</option>
-                     {else}
-                     <option value="{$value->codagente}">{$value->get_fullname()}</option>
-                     {/if}
+                  {if="$value->codagente==$fsc->codagente"}
+                  <option value="{$value->codagente}" selected="">{$value->get_fullname()}</option>
+                  {else}
+                  <option value="{$value->codagente}">{$value->get_fullname()}</option>
+                  {/if}
                   {/loop}
                </select>
             </div>
@@ -524,15 +663,15 @@
 <div class="table-responsive">
    <table class="table table-hover">
       <thead>
-         <tr>
-            <th></th>
-            <th></th>
-            <th class="text-left">Código + Num. Proveedor</th>
-            <th class="text-left">Proveedor</th>
-            <th class="text-left">Observaciones</th>
-            <th class="text-right">Total</th>
-            <th class="text-right">Fecha</th>
-         </tr>
+      <tr>
+         <th></th>
+         <th></th>
+         <th class="text-left">Código + Num. Proveedor</th>
+         <th class="text-left">Proveedor</th>
+         <th class="text-left">Observaciones</th>
+         <th class="text-right">Total</th>
+         <th class="text-right">Fecha</th>
+      </tr>
       </thead>
       {loop="$fsc->resultados"}
       <tr class="clickableRow{if="$value->anulada"} danger{elseif="$value->pagada"} success{elseif="$value->total<=0"} warning{/if}" href="{$value->url()}">
@@ -591,7 +730,7 @@
          <ul class="pagination">
             {loop="$fsc->paginas()"}
             <li{if="$value['actual']"} class="active"{/if}>
-               <a href="{$value['url']}">{$value['num']}</a>
+            <a href="{$value['url']}">{$value['num']}</a>
             </li>
             {/loop}
          </ul>
@@ -599,11 +738,11 @@
    </div>
 </div>
 {else}
-   {loop="$fsc->extensions"}
-      {if="$value->type=='tab' AND $fsc->mostrar=='ext_'.$value->name"}
-      <iframe src="index.php?page={$value->from}{$value->params}" width="100%" height="2000" frameborder="0"></iframe>
-      {/if}
-   {/loop}
+{loop="$fsc->extensions"}
+{if="$value->type=='tab' AND $fsc->mostrar=='ext_'.$value->name"}
+<iframe src="index.php?page={$value->from}{$value->params}" width="100%" height="2000" frameborder="0"></iframe>
+{/if}
+{/loop}
 {/if}
 
 <form class="form" role="form" id="f_buscar_lineas" name="f_buscar_lineas" action="{$fsc->url()}" method="post">

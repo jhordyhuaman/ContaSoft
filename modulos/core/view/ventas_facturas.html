@@ -66,9 +66,263 @@
             }
          }
       });
-   });
-</script>
 
+
+
+      $('#centra_compra').click(function () {
+         $('#modal_cent_compra').modal('show');
+
+         $.ajax({
+            Type : 'GET',
+            url: 'index.php?page=ventas_facturas&geturl=1',
+            dataType: 'json',
+            success:function (data) {
+               console.log(data);
+               var cuenta = "4011";
+               var descri = "IMPUESTO GENERAL A LAS VENTAS";
+               var cuenta2 = "701";
+               var descri2 = "MERCADERIA";
+               var saldo = 0;
+               var saldo_701 = 0;
+               var total_libro = 0;
+
+               $.each(data,function (i,json) {
+                  if(json.codimpuesto != 'EXO'){
+                     saldo +=roundToTwo(json.pvptotal-json.pvptotal/1.18);
+                  }
+                  total_libro += json.pvptotal;
+                  saldo_701 += json.pvptotal/1.18;
+                  numlineas = i+1;
+                  var datos = "<tr id='partida_"+numlineas+"'>\n\
+             <td>\n\
+            <input class='form-control' id='codsubcuenta_"+numlineas+"' name='codsubcuenta_"+numlineas+"' type='text' value='"+json.idsubcuenta+"'</td>\n\
+             <td>\n\
+            <input class='form-control' type='text' id='desc_"+numlineas+"' name='desc_"+numlineas+"' disabled='disabled' value='"+json.namescuenta+"'/>\n\
+             </td>"+
+                          '<td><div class="form-control">'+
+                          '<div class="row" style="position: relative; left: 8px; bottom: 9px">' +
+                          '<div type="checkbox" class="col-ms-6">' +
+                          '<label class="radio-inline" style="font-size: 9px; color:#1a237e"><input  id="checdebe_'+numlineas+'" value="debe" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Debe</label>'+
+                          '</div>'+
+                          '<div type="checkbox" class="col-ms-6" style="position: relative; bottom: 3px">'+
+                          '<label class="radio-inline" style="font-size: 9px; color:#91170a"><input  id="chechaber_'+numlineas+'"  value="haber" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)"/>Haber</label>'+
+                          '</div>'+
+                          '</div>'+
+                          '</div>' +
+                          '</td>'+
+                          "<td>\n\
+                         <input class='form-control text-right' type='text' id='saldo_"+numlineas+"' name='saldo_"+numlineas+"' value='"+json.pvptotal+"' disabled='disabled'/>\n\
+            </td>\n\
+             <td>\n\
+            <input class='form-control text-right' type='text' id='debe_"+numlineas+"' name='debe_"+numlineas+"' value='0'\n\
+             </td>\n\
+            <td>\n\
+            <input class='form-control text-right' type='text' id='haber_"+numlineas+"' name='haber_"+numlineas+"' value='0'\n\
+            </td></tr>";
+
+                  $('#partidas').append(datos);
+
+               });
+               total_libro += saldo;
+               numlineas++;
+               var datos2 = "<tr id='partida_"+numlineas+"'>\n\
+             <td>\n\
+            <input class='form-control' id='codsubcuenta_"+numlineas+"' name='codsubcuenta_"+numlineas+"' type='text' value='"+cuenta2+"'</td>\n\
+             <td>\n\
+            <input class='form-control' type='text' id='desc_"+numlineas+"' name='desc_"+numlineas+"' disabled='disabled' value='"+descri2+"'/>\n\
+             </td>"+
+                       '<td><div class="form-control">'+
+                       '<div class="row" style="position: relative; left: 8px; bottom: 9px">' +
+                       '<div type="checkbox" class="col-ms-6">' +
+                       '<label class="radio-inline" style="font-size: 9px; color:#1a237e"><input  id="checdebe_'+numlineas+'" value="debe" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Debe</label>'+
+                       '</div>'+
+                       '<div type="checkbox" class="col-ms-6" style="position: relative; bottom: 3px">'+
+                       '<label class="radio-inline" style="font-size: 9px; color:#91170a"><input  id="chechaber_'+numlineas+'"  value="haber" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Haber</label>'+
+                       '</div>'+
+                       '</div>'+
+                       '</div></td>'+
+                       " <td><input class='form-control text-right' type='text' id='saldo_"+numlineas+"' name='saldo_"+numlineas+"' value='"+saldo_701+"' disabled='disabled'/>\n\
+            </td>\n\
+             <td>\n\
+            <input class='form-control text-right' type='text' id='debe_"+numlineas+"' name='debe_"+numlineas+"' value='0' />\n\
+             </td>\n\
+            <td>\n\
+            <input class='form-control text-right' type='text' id='haber_"+numlineas+"' name='haber_"+numlineas+"' value='0'/>\n\
+            </td></tr>";
+
+               $('#partidas').append(datos2);
+
+               numlineas++;
+               var datos = "<tr id='partida_"+numlineas+"'>\n\
+             <td>\n\
+            <input class='form-control' id='codsubcuenta_"+numlineas+"' name='codsubcuenta_"+numlineas+"' type='text' value='"+cuenta+"'</td>\n\
+             <td>\n\
+            <input class='form-control' type='text' id='desc_"+numlineas+"' name='desc_"+numlineas+"' disabled='disabled' value='"+descri+"'/>\n\
+             </td>"+
+                       '<td><div class="form-control">'+
+                       '<div class="row" style="position: relative; left: 8px; bottom: 9px">' +
+                       '<div type="checkbox" class="col-ms-6">' +
+                       '<label class="radio-inline" style="font-size: 9px; color:#1a237e"><input  id="checdebe_'+numlineas+'" value="debe" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Debe</label>'+
+                       '</div>'+
+                       '<div type="checkbox" class="col-ms-6" style="position: relative; bottom: 3px">'+
+                       '<label class="radio-inline" style="font-size: 9px; color:#91170a"><input  id="chechaber_'+numlineas+'"  value="haber" type="radio" name="saldo_' + numlineas +'" onclick="combobox(this)" />Haber</label>'+
+                       '</div>'+
+                       '</div>'+
+                       '</div></td>'+
+                       " <td><input class='form-control text-right' type='text' id='saldo_"+numlineas+"' name='saldo_"+numlineas+"' value='"+saldo+"' disabled='disabled'/>\n\
+            </td>\n\
+             <td>\n\
+            <input class='form-control text-right' type='text' id='debe_"+numlineas+"' name='debe_"+numlineas+"' value='0' />\n\
+             </td>\n\
+            <td>\n\
+            <input class='form-control text-right' type='text' id='haber_"+numlineas+"' name='haber_"+numlineas+"' value='0'/>\n\
+            </td></tr>";
+
+               $('#partidas').append(datos);
+
+
+
+
+
+               $('#num_linea').val(numlineas);
+
+
+            },
+            error:function (data) {
+               alert("Error ¡¡");
+               console.log(data);
+
+            }
+         });
+       });
+   });
+   function roundToTwo(num) {
+      return +(Math.round(num + "e+2")  + "e-2");
+   }
+   function combobox(e) {
+
+      console.log(e);
+      var saldo = $(e).parents('tr').find('td').eq(3).find('input').val();
+      var debe = $(e).parents('tr').find('td').eq(4).find('input').val();
+      var haber = $(e).parents('tr').find('td').eq(5).find('input').val();
+
+      if ($(e).val() == 'haber') {
+         $(e).parents('tr').find('td').eq(5).find('input').val(saldo);
+         $(e).parents('tr').find('td').eq(4).find('input').val('0');
+      } else {
+         $(e).parents('tr').find('td').eq(4).find('input').val(saldo);
+         $(e).parents('tr').find('td').eq(5).find('input').val('0');
+
+      }
+
+      var sladohaber = 0;
+      var sladodebe = 0;
+
+      $('#partidas tr').each(function () {
+         var asignar = $(this).find('td').eq(2).find('input:checked').val();
+         var saldo = $(this).find('td').eq(3).find('input').val();
+         console.log(asignar);
+         if (asignar == 'debe') {
+            sladodebe += roundToTwo(saldo);
+         } else if (asignar == 'haber') {
+            sladohaber += roundToTwo(saldo);
+         }
+
+      });
+      var descuadre = sladodebe - sladohaber;
+
+      $('#form_descuadre').val(descuadre);
+   }
+   function cent_compra(v) {
+      if(v===true){
+         //$('#f_cent_ventas').submit();
+         console.log($('#f_cent_ventas').serializeArray());
+         $('#modal_cent_compra').modal('hidden');
+
+      }
+
+   }
+</script>
+<form class="form" role="form" id="f_cent_ventas" name="f_cent_ventas" action="{$fsc->url()}" method="post">
+   <input type="hidden" id="num_linea" name="numlineas" value="0">
+   <div class="modal" id="modal_cent_compra">
+      <div class="modal-dialog" style="width: 99%; max-width: 950px;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+               <h4 class="modal-title">Libros Generados</h4>
+            </div>
+            <div class="modal-body">
+               <div class="tab-content">
+                  <div role="tabpanel" class="tab-pane active" id="lineas">
+                     <div class="row">
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                           <div class="form-group">
+                              Fecha:
+                              <input class="form-control datepicker" name="fecha" type="text" value="{$fsc->asiento->fecha}"/>
+                           </div>
+                        </div>
+                        <div class="col-lg-3 col-md-2 col-sm-2">
+                           <div class="form-group">
+                              Concepto:
+                              <input class="form-control" name="concepto" type="text" value="" autocomplete="off"/>
+                           </div>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+                           <div class="form-group">
+                              Importe:
+                              <input class="form-control" type="text" name="importe" id="importe" value="0" readonly/>
+                           </div>
+                        </div>
+                        <div class="col-lg-1 col-md-2 col-sm-2">
+                           <div class="form-group">
+                              Descuadre:
+                              <input class="form-control" type="text" name="descuadre" value="0" readonly/>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                        <tr>
+                           <th class="text-left" width="100">Subcuenta</th>
+                           <th class="text-left">Descripción</th>
+                           <th class="text-left">Asignar</th>
+                           <th class="text-right" width="110">Saldo</th>
+                           <th class="text-right" width="110">Debe</th>
+                           <th class="text-right" width="110">Haber</th>
+                        </tr>
+                        </thead>
+                        <tbody id="partidas">
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="container-fluid">
+                     <div class="row">
+
+                     </div>
+                     <hr/>
+                     <div class="row">
+                        <div class="col-xs-6">
+                        </div>
+                        <div class="col-xs-6 text-right">
+                           <div class="btn-group">
+                              <button id="b_guardar_asiento" class="btn btn-sm btn-primary" type="button" onclick="cent_compra(true)" title="Guardar y volver a empezar">
+                                 <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Centralisar Libro Ventas
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+      </div>
+   </div>
+   </div>
+</form>
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
    <div class="row">
       <div class="col-sm-8 col-xs-6">
@@ -90,6 +344,10 @@
             <a class="btn btn-sm btn-success" href="index.php?page=nueva_venta&tipo=factura">
                <span class="glyphicon glyphicon-plus"></span>
                <span class="hidden-xs">&nbsp; Nueva</span>
+            </a>
+            <a class="btn btn-sm btn-danger" id="centra_compra">
+               <span class="glyphicon glyphicon-asterisk"></span>
+               <span class="hidden-xs">&nbsp; Centralizar Compras</span>
             </a>
             {if="$fsc->huecos"}
             <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#modal_huecos">

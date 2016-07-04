@@ -615,18 +615,6 @@ function buscar_articulos()
                insertar = true;
             }
             
-            if(insertar)
-            {
-               $("#kiwimaru_results").html("<p class=\"help-block\" style=\"padding: 5px;\">Estos son\n\
-                  los resultados de <b>kiwimaru</b>, el potente buscador de tiendas online integrado en\n\
-                  FacturaScripts, para que puedas buscar nuevos proveedores o simplemente comparar precios.\n\
-                  Si deseas añadir tus artículos a este buscador y ganar nuevos clientes fácilmente,\n\
-                  <a href=\"https://www.facturascripts.com/comm3/index.php?page=community_feedback&feedback_privado=TRUE\" target=\"_blank\">\n\
-                  contacta con nosotros</a>.</p>\n\
-                  <div class=\"table-responsive\"><table class=\"table table-hover\"><thead><tr>\n\
-                  <th class=\"text-left\">Sector / Tienda / Familia</th><th class=\"text-left\">Referencia + descripción</th>\n\
-                  <th class=\"text-right\">Precio+IVA</th></tr></thead>"+items.join('')+"</table></div>");
-            }
          });
       }
    }

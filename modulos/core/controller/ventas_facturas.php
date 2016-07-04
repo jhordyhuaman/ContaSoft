@@ -28,6 +28,8 @@ class ventas_facturas extends fs_controller
    public $total_resultados;
    public $total_resultados_comision;
    public $total_resultados_txt;
+   public $listacliente;
+   public $datosfactura;
    
    public function __construct()
    {
@@ -40,7 +42,12 @@ class ventas_facturas extends fs_controller
       $this->factura = new factura_cliente();
       $this->huecos = array();
       $this->serie = new serie();
-      
+      $this->listacliente = new linea_factura_cliente(); 
+      if(isset($_REQUEST['geturl'])==1){
+         $this->template = FALSE;
+         header('Content-Type: application/json');
+         echo json_encode($this->datosfactura = $this->listacliente->all_factura_cli());
+      }
       $this->mostrar = 'todo';
       if( isset($_GET['mostrar']) )
       {

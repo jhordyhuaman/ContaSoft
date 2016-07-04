@@ -9,10 +9,10 @@
    proveedor = {function="json_encode($fsc->proveedor_s)"};
    nueva_compra_url = '{$fsc->url()}';
    precio_compra = '{#FS_PRECIO_COMPRA#}';
-   
    {if="$fsc->empresa->recequivalencia"}
    tiene_recargo = true;
    {/if}
+
    //------------ cod asiento----------------------------
    function add_cuenta()
    {
